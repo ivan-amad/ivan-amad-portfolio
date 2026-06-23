@@ -10,6 +10,7 @@ const bcrypt   = require('bcryptjs');
 const fs       = require('fs');
 const path     = require('path');
 const { createClient } = require('@supabase/supabase-js');
+const ws = require('ws');
 require('dotenv').config();
 
 const app  = express();
@@ -20,7 +21,9 @@ const SUPABASE_URL   = process.env.SUPABASE_URL   || 'https://wgmdgrffutasexxiee
 const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_KEY;
 const STORAGE_BUCKET = 'portfolio-images';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  realtime: { transport: ws }
+});
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 const PUBLIC_DIR = path.join(__dirname, 'public');
