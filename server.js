@@ -10,8 +10,23 @@ const bcrypt   = require('bcryptjs');
 const fs       = require('fs');
 const path     = require('path');
 const { createClient } = require('@supabase/supabase-js');
-const ws = require('ws');
 require('dotenv').config();
+
+// Node 18 has no native WebSocket. Supabase checks for it on init even though
+// we only use REST (DB + Storage), not Realtime. Stub it out so the check passes.
+if (typeof globalThis.WebSocket === 'undefined') {
+  globalThis.WebSocket = class FakeWS {
+    constructor() {}
+    static get CONNECTING() { return 0; }
+    static get OPEN()       { return 1; }
+    static get CLOSING()    { return 2; }
+    static get CLOSED()     { return 3; }
+    addEventListener()    {}
+    removeEventListener() {}
+    send()  {}
+    close() {}
+  };
+}
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -21,9 +36,7 @@ const SUPABASE_URL   = process.env.SUPABASE_URL   || 'https://wgmdgrffutasexxiee
 const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_KEY;
 const STORAGE_BUCKET = 'portfolio-images';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  realtime: { transport: ws }
-});
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 const PUBLIC_DIR = path.join(__dirname, 'public');
