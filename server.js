@@ -1,6 +1,6 @@
 /**
  * Ivan Amad Portfolio — Backend Server
- * Node.js + Express
+ * Node.js + Express + Supabase Storage & DB
  */
 
 const express  = require('express');
@@ -9,20 +9,23 @@ const session  = require('express-session');
 const bcrypt   = require('bcryptjs');
 const fs       = require('fs');
 const path     = require('path');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Paths ───────────────────────────────────────────────────────────────────
-const PUBLIC_DIR  = path.join(__dirname, 'public');
-const ADMIN_DIR   = path.join(__dirname, 'admin');
-const UPLOAD_DIR  = path.join(PUBLIC_DIR, 'images');
-const DATA_DIR    = path.join(__dirname, 'data');
-const GALLERY_FILE  = path.join(DATA_DIR, 'gallery.json');
-const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
+// ─── Supabase ─────────────────────────────────────────────────────────────────
+const SUPABASE_URL   = process.env.SUPABASE_URL   || 'https://wgmdgrffutasexxieeyk.supabase.co';
+const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_KEY;
+const STORAGE_BUCKET = 'portfolio-images';
 
-[DATA_DIR, UPLOAD_DIR].forEach(d => fs.mkdirSync(d, { recursive: true }));
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ─── Paths ────────────────────────────────────────────────────────────────────
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const ADMIN_DIR  = path.join(__dirname, 'admin');
+const DATA_DIR   = path.join(__dirname, 'data');
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(express.json());
@@ -34,7 +37,7 @@ app.use(session({
   cookie: { secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
 
-// ─── Multer ───────────────────────────────────────────────────────────────────
+// ─── Multer (memory — uploads go to Supabase) ─────────────────────────────────
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
@@ -46,47 +49,62 @@ const upload = multer({
   limits: { fileSize: 30 * 1024 * 1024 }
 });
 
-// ─── Data helpers ─────────────────────────────────────────────────────────────
-// Dynamic category check — reads gallery.json keys so new chapters always work
-function isValidCategory(cat) {
-  if (!cat || typeof cat !== 'string') return false;
-  const g = readGallery();
-  return Object.prototype.hasOwnProperty.call(g, cat);
-}
-
+// ─── Data helpers (Supabase DB) ───────────────────────────────────────────────
 function defaultGallery() {
-  const defaultKeys = ['concept-art', 'storyboards', 'branding', 'logos', 'pixel-art', 'booth', 'social'];
+  const keys = ['concept-art', 'storyboards', 'branding', 'logos', 'pixel-art', 'booth', 'social'];
   const out = {};
-  defaultKeys.forEach(c => {
-    out[c] = { cover: null, strips: [], mosaic: [null, null, null], gallery: [] };
-  });
+  keys.forEach(c => { out[c] = { cover: null, strips: [], mosaic: [null, null, null], gallery: [] }; });
   return out;
 }
 
-function readGallery() {
-  if (!fs.existsSync(GALLERY_FILE)) {
-    const d = defaultGallery();
-    fs.writeFileSync(GALLERY_FILE, JSON.stringify(d, null, 2));
-    return d;
+async function readGallery() {
+  const { data, error } = await supabase.from('site_data').select('value').eq('key', 'gallery').single();
+  if (error || !data) return defaultGallery();
+  return data.value;
+}
+
+async function saveGallery(gallery) {
+  await supabase.from('site_data').upsert({ key: 'gallery', value: gallery, updated_at: new Date() });
+}
+
+async function readChapters() {
+  const { data, error } = await supabase.from('site_data').select('value').eq('key', 'chapters').single();
+  if (error || !data) {
+    try { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'chapters.json'), 'utf-8')); }
+    catch(e) { return []; }
   }
-  return JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf-8'));
+  return data.value;
 }
 
-function saveGallery(data) {
-  fs.writeFileSync(GALLERY_FILE, JSON.stringify(data, null, 2));
+async function saveChapters(arr) {
+  await supabase.from('site_data').upsert({ key: 'chapters', value: arr, updated_at: new Date() });
+  const gallery = await readGallery();
+  arr.forEach(ch => {
+    if (!gallery[ch.key]) gallery[ch.key] = { cover: null, strips: [], mosaic: [null,null,null], gallery: [] };
+  });
+  await saveGallery(gallery);
 }
 
-function readSettings() {
-  if (!fs.existsSync(SETTINGS_FILE)) {
-    const d = { siteProtected: false, sitePassword: '' };
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(d, null, 2));
-    return d;
-  }
-  return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf-8'));
+async function readSettings() {
+  const { data, error } = await supabase.from('site_data').select('value').eq('key', 'settings').single();
+  if (error || !data) return { siteProtected: false, sitePassword: '' };
+  return data.value;
 }
 
-function saveSettings(data) {
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2));
+async function saveSettings(s) {
+  await supabase.from('site_data').upsert({ key: 'settings', value: s, updated_at: new Date() });
+}
+
+async function deleteFromStorage(publicUrl) {
+  if (!publicUrl) return;
+  try {
+    const marker = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
+    const idx = publicUrl.indexOf(marker);
+    if (idx !== -1) {
+      const filePath = publicUrl.slice(idx + marker.length);
+      await supabase.storage.from(STORAGE_BUCKET).remove([filePath]);
+    }
+  } catch(e) { /* ignore */ }
 }
 
 // ─── Auth middleware ──────────────────────────────────────────────────────────
@@ -95,8 +113,8 @@ function requireAdmin(req, res, next) {
   res.status(401).json({ ok: false, error: 'Unauthorized' });
 }
 
-function siteGate(req, res, next) {
-  const settings = readSettings();
+async function siteGate(req, res, next) {
+  const settings = await readSettings();
   if (!settings.siteProtected) return next();
   if (req.session.adminAuthed || req.session.siteAuthed) return next();
   if (req.path === '/enter' || req.path === '/api/site-login') return next();
@@ -105,18 +123,15 @@ function siteGate(req, res, next) {
 }
 
 // ─── Static files ─────────────────────────────────────────────────────────────
-app.use('/images', express.static(UPLOAD_DIR));
-app.use('/admin', express.static(ADMIN_DIR));
+app.use('/admin',  express.static(ADMIN_DIR));
 app.use('/sounds', express.static(path.join(PUBLIC_DIR, 'sounds')));
 app.use('/videos', express.static(path.join(PUBLIC_DIR, 'videos')));
 
-// ─── Site password gate ───────────────────────────────────────────────────────
-app.get('/enter', (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, 'enter.html'));
-});
+// ─── Routes ───────────────────────────────────────────────────────────────────
+app.get('/enter', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'enter.html')));
 
-app.post('/api/site-login', (req, res) => {
-  const settings = readSettings();
+app.post('/api/site-login', async (req, res) => {
+  const settings = await readSettings();
   if (!settings.siteProtected || req.body.password === settings.sitePassword) {
     req.session.siteAuthed = true;
     res.json({ ok: true });
@@ -125,16 +140,12 @@ app.post('/api/site-login', (req, res) => {
   }
 });
 
-app.get('/', siteGate, (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
-});
+app.get('/', siteGate, (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
 
 // ─── Admin Auth ───────────────────────────────────────────────────────────────
 app.post('/api/admin/login', async (req, res) => {
   const hash = process.env.ADMIN_PASSWORD_HASH;
-  if (!hash) {
-    return res.status(500).json({ ok: false, error: 'Admin password not set. Run: node setup.js' });
-  }
+  if (!hash) return res.status(500).json({ ok: false, error: 'Admin password not set. Run: node setup.js' });
   try {
     const match = await bcrypt.compare(req.body.password || '', hash);
     if (match) {
@@ -144,199 +155,151 @@ app.post('/api/admin/login', async (req, res) => {
     } else {
       res.status(401).json({ ok: false, error: 'Wrong password' });
     }
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
-  }
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
-app.post('/api/admin/logout', (req, res) => {
-  req.session.adminAuthed = false;
-  res.json({ ok: true });
-});
+app.post('/api/admin/logout', (req, res) => { req.session.adminAuthed = false; res.json({ ok: true }); });
+app.get('/api/admin/check',  (req, res) => res.json({ authed: !!req.session.adminAuthed }));
 
-app.get('/api/admin/check', (req, res) => {
-  res.json({ authed: !!req.session.adminAuthed });
-});
-
-// ─── Gallery API (public) ─────────────────────────────────────────────────────
-app.get('/api/gallery', (req, res) => {
+// ─── Gallery API ──────────────────────────────────────────────────────────────
+app.get('/api/gallery', async (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-  res.set('Pragma', 'no-cache');
-  res.json(readGallery());
+  res.json(await readGallery());
 });
 
 // ─── Admin: Upload image ──────────────────────────────────────────────────────
 app.post('/api/admin/upload', requireAdmin, (req, res) => {
-  upload.single('image')(req, res, (err) => {
+  upload.single('image')(req, res, async (err) => {
     if (err) return res.status(400).json({ ok: false, error: err.message });
     if (!req.file) return res.status(400).json({ ok: false, error: 'No file received' });
 
     const { category, slot, index, label } = req.body;
-    if (!isValidCategory(category)) {
+    const data = await readGallery();
+
+    if (!category || !Object.prototype.hasOwnProperty.call(data, category)) {
       return res.status(400).json({ ok: false, error: 'Invalid category: ' + category });
     }
 
-    const ext      = path.extname(req.file.originalname).toLowerCase();
-    const filename = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
-    const destDir  = path.join(UPLOAD_DIR, category);
-    fs.mkdirSync(destDir, { recursive: true });
-    fs.writeFileSync(path.join(destDir, filename), req.file.buffer);
+    const ext         = path.extname(req.file.originalname).toLowerCase();
+    const filename    = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
+    const storagePath = `${category}/${filename}`;
 
-    const filePath = `/images/${category}/${filename}`;
-    const data = readGallery();
-    if (!data[category]) {
-      data[category] = { cover: null, strips: [], mosaic: [null, null, null], gallery: [] };
-    }
+    const { error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(storagePath, req.file.buffer, { contentType: req.file.mimetype });
+
+    if (uploadError) return res.status(500).json({ ok: false, error: 'Upload failed: ' + uploadError.message });
+
+    const { data: { publicUrl } } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
 
     const cat = data[category];
 
     switch (slot) {
       case 'cover':
-        if (cat.cover) {
-          const old = path.join(PUBLIC_DIR, cat.cover);
-          if (fs.existsSync(old)) fs.unlinkSync(old);
-        }
-        cat.cover = filePath;
+        if (cat.cover) await deleteFromStorage(cat.cover);
+        cat.cover = publicUrl;
         break;
-
       case 'strip':
-        cat.strips.push(filePath);
+        cat.strips.push(publicUrl);
         break;
-
       case 'mosaic': {
         const idx = parseInt(index, 10);
-        if (isNaN(idx) || idx < 0 || idx > 2) {
-          return res.status(400).json({ ok: false, error: 'Mosaic index must be 0–2' });
-        }
-        if (cat.mosaic[idx]) {
-          const old = path.join(PUBLIC_DIR, cat.mosaic[idx]);
-          if (fs.existsSync(old)) fs.unlinkSync(old);
-        }
-        cat.mosaic[idx] = filePath;
+        if (isNaN(idx) || idx < 0 || idx > 2) return res.status(400).json({ ok: false, error: 'Mosaic index must be 0–2' });
+        if (cat.mosaic[idx]) await deleteFromStorage(cat.mosaic[idx]);
+        cat.mosaic[idx] = publicUrl;
         break;
       }
-
       case 'gallery':
         cat.gallery.push({
           id: String(cat.gallery.length + 1).padStart(2, '0'),
-          src: filePath,
+          src: publicUrl,
           label: label || `${category} ${cat.gallery.length + 1}`
         });
         break;
-
       default:
         return res.status(400).json({ ok: false, error: 'Invalid slot. Use: cover|strip|mosaic|gallery' });
     }
 
-    saveGallery(data);
-    res.json({ ok: true, path: filePath, category: data[category] });
+    await saveGallery(data);
+    res.json({ ok: true, path: publicUrl, category: data[category] });
   });
 });
 
 // ─── Admin: Delete image ──────────────────────────────────────────────────────
-app.delete('/api/admin/image', requireAdmin, (req, res) => {
+app.delete('/api/admin/image', requireAdmin, async (req, res) => {
   const { category, slot, index } = req.body;
-  if (!isValidCategory(category)) {
+  const data = await readGallery();
+
+  if (!category || !Object.prototype.hasOwnProperty.call(data, category)) {
     return res.status(400).json({ ok: false, error: 'Invalid category' });
   }
 
-  const data = readGallery();
-  const cat  = data[category];
+  const cat = data[category];
   if (!cat) return res.status(404).json({ ok: false, error: 'Category not found' });
 
   let src = null;
-
   switch (slot) {
-    case 'cover':
-      src = cat.cover;
-      cat.cover = null;
-      break;
-    case 'strip': {
-      const idx = parseInt(index, 10);
-      src = cat.strips[idx];
-      cat.strips.splice(idx, 1);
-      break;
-    }
-    case 'mosaic': {
-      const idx = parseInt(index, 10);
-      src = cat.mosaic[idx];
-      cat.mosaic[idx] = null;
-      break;
-    }
-    case 'gallery': {
-      const idx = parseInt(index, 10);
-      src = cat.gallery[idx]?.src;
-      cat.gallery.splice(idx, 1);
-      cat.gallery.forEach((item, i) => { item.id = String(i + 1).padStart(2, '0'); });
-      break;
-    }
-    default:
-      return res.status(400).json({ ok: false, error: 'Invalid slot' });
+    case 'cover':    src = cat.cover; cat.cover = null; break;
+    case 'strip':  { const i = parseInt(index,10); src = cat.strips[i];   cat.strips.splice(i,1); break; }
+    case 'mosaic': { const i = parseInt(index,10); src = cat.mosaic[i];   cat.mosaic[i] = null;   break; }
+    case 'gallery':{ const i = parseInt(index,10); src = cat.gallery[i]?.src; cat.gallery.splice(i,1);
+                     cat.gallery.forEach((item,j)=>{ item.id = String(j+1).padStart(2,'0'); }); break; }
+    default: return res.status(400).json({ ok: false, error: 'Invalid slot' });
   }
 
-  if (src) {
-    const filePath = path.join(PUBLIC_DIR, src);
-    if (fs.existsSync(filePath)) {
-      try { fs.unlinkSync(filePath); } catch(e) { /* ignore */ }
-    }
-  }
-
-  saveGallery(data);
+  if (src) await deleteFromStorage(src);
+  await saveGallery(data);
   res.json({ ok: true, category: data[category] });
 });
 
-// ─── Admin: Update gallery item label ─────────────────────────────────────────
-app.patch('/api/admin/gallery-label', requireAdmin, (req, res) => {
+// ─── Admin: Gallery label & reorder ──────────────────────────────────────────
+app.patch('/api/admin/gallery-label', requireAdmin, async (req, res) => {
   const { category, index, label } = req.body;
-  if (!isValidCategory(category)) {
-    return res.status(400).json({ ok: false, error: 'Invalid category' });
-  }
-  const data = readGallery();
+  const data = await readGallery();
   const cat  = data[category];
-  if (!cat || !cat.gallery[index]) {
-    return res.status(404).json({ ok: false, error: 'Item not found' });
-  }
+  if (!cat || !cat.gallery[index]) return res.status(404).json({ ok: false, error: 'Item not found' });
   cat.gallery[index].label = String(label).slice(0, 100);
-  saveGallery(data);
+  await saveGallery(data);
   res.json({ ok: true, category: data[category] });
 });
 
-// ─── Admin: Reorder gallery item ──────────────────────────────────────────────
-app.post('/api/admin/reorder', requireAdmin, (req, res) => {
+app.post('/api/admin/reorder', requireAdmin, async (req, res) => {
   const { category, fromIndex, toIndex } = req.body;
-  if (!isValidCategory(category)) {
-    return res.status(400).json({ ok: false, error: 'Invalid category' });
-  }
-  const data = readGallery();
+  const data = await readGallery();
   const cat  = data[category];
   if (!cat) return res.status(404).json({ ok: false, error: 'Category not found' });
-
-  const gallery = cat.gallery;
-  const from = parseInt(fromIndex, 10);
-  const to   = parseInt(toIndex,   10);
-  if (isNaN(from) || isNaN(to) || from < 0 || from >= gallery.length || to < 0 || to >= gallery.length) {
-    return res.status(400).json({ ok: false, error: 'Invalid index' });
-  }
-  const [item] = gallery.splice(from, 1);
-  gallery.splice(to, 0, item);
-  gallery.forEach((it, i) => { it.id = String(i + 1).padStart(2, '0'); });
-  saveGallery(data);
+  const from = parseInt(fromIndex,10), to = parseInt(toIndex,10);
+  const [item] = cat.gallery.splice(from,1);
+  cat.gallery.splice(to,0,item);
+  cat.gallery.forEach((it,i)=>{ it.id = String(i+1).padStart(2,'0'); });
+  await saveGallery(data);
   res.json({ ok: true, category: data[category] });
 });
 
 // ─── Admin: Settings ──────────────────────────────────────────────────────────
-app.get('/api/admin/settings', requireAdmin, (req, res) => {
-  res.json(readSettings());
-});
+app.get('/api/admin/settings', requireAdmin, async (req, res) => res.json(await readSettings()));
 
-app.post('/api/admin/settings', requireAdmin, (req, res) => {
-  const current = readSettings();
+app.post('/api/admin/settings', requireAdmin, async (req, res) => {
+  const current = await readSettings();
   const updated = {
     siteProtected: req.body.siteProtected === true || req.body.siteProtected === 'true',
     sitePassword:  req.body.sitePassword !== undefined ? req.body.sitePassword : current.sitePassword
   };
-  saveSettings(updated);
+  await saveSettings(updated);
   res.json({ ok: true, settings: updated });
+});
+
+// ─── Chapters API ─────────────────────────────────────────────────────────────
+app.get('/api/chapters', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(await readChapters());
+});
+
+app.post('/api/chapters', requireAdmin, async (req, res) => {
+  const arr = req.body;
+  if (!Array.isArray(arr)) return res.status(400).json({ ok: false, error: 'Expected array' });
+  await saveChapters(arr);
+  res.json({ ok: true });
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
@@ -344,35 +307,4 @@ app.listen(PORT, () => {
   console.log(`\n◼ Ivan Amad Portfolio Server`);
   console.log(`  Running at: http://localhost:${PORT}`);
   console.log(`  Admin panel: http://localhost:${PORT}/admin\n`);
-});
-
-// ─── Chapters API ─────────────────────────────────────────────────────────────
-const CHAPTERS_FILE = path.join(DATA_DIR, 'chapters.json');
-
-function readChapters() {
-  const def = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'chapters.json'), 'utf-8'));
-  if (!fs.existsSync(CHAPTERS_FILE)) return def;
-  try { return JSON.parse(fs.readFileSync(CHAPTERS_FILE, 'utf-8')); }
-  catch(e) { return def; }
-}
-
-function saveChapters(arr) {
-  fs.writeFileSync(CHAPTERS_FILE, JSON.stringify(arr, null, 2));
-  // Also ensure gallery.json has entries for all chapter keys
-  const data = readGallery();
-  arr.forEach(ch => {
-    if (!data[ch.key]) data[ch.key] = { cover: null, strips: [], mosaic: [null,null,null], gallery: [] };
-  });
-  saveGallery(data);
-}
-
-app.get('/api/chapters', (req, res) => {
-  res.set('Cache-Control', 'no-store');
-  res.json(readChapters());});
-
-app.post('/api/chapters', requireAdmin, (req, res) => {
-  const arr = req.body;
-  if (!Array.isArray(arr)) return res.status(400).json({ ok: false, error: 'Expected array' });
-  saveChapters(arr);
-  res.json({ ok: true });
 });
