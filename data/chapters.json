@@ -1,0 +1,114 @@
+[
+  {
+    "id": "concept-art",
+    "key": "concept-art",
+    "label": "Concept Art",
+    "titleMain": "Concept",
+    "titleOutline": "Art",
+    "desc": "Cinematic worlds built from light, shadow, and imagination.",
+    "cardClass": "wide",
+    "color": [
+      210,
+      100,
+      60
+    ],
+    "order": 0,
+    "enabled": true
+  },
+  {
+    "id": "storyboards",
+    "key": "storyboards",
+    "label": "Storyboards",
+    "titleMain": "Story",
+    "titleOutline": "boards",
+    "desc": "Sequential narratives — frame by frame, scene by scene.",
+    "cardClass": "tall",
+    "color": [
+      70,
+      120,
+      220
+    ],
+    "order": 1,
+    "enabled": true
+  },
+  {
+    "id": "branding",
+    "key": "branding",
+    "label": "Branding",
+    "titleMain": "Brand",
+    "titleOutline": "Systems",
+    "desc": "Visual identities built to last — cohesive, bold, distinctive.",
+    "cardClass": "sq",
+    "color": [
+      140,
+      60,
+      220
+    ],
+    "order": 2,
+    "enabled": true
+  },
+  {
+    "id": "logos",
+    "key": "logos",
+    "label": "Logos",
+    "titleMain": "Logo",
+    "titleOutline": "Marks",
+    "desc": "Pure symbols. Distilled essence. Marks that speak without words.",
+    "cardClass": "sq-sm",
+    "color": [
+      220,
+      175,
+      35
+    ],
+    "order": 3,
+    "enabled": true
+  },
+  {
+    "id": "pixel-art",
+    "key": "pixel-art",
+    "label": "Pixel Art",
+    "titleMain": "Pixel",
+    "titleOutline": "Art",
+    "desc": "Digital worlds one pixel at a time — retro precision, modern soul.",
+    "cardClass": "sq-sm",
+    "color": [
+      40,
+      200,
+      130
+    ],
+    "order": 4,
+    "enabled": true
+  },
+  {
+    "id": "booth-designs",
+    "key": "booth",
+    "label": "Booth Designs",
+    "titleMain": "Booth",
+    "titleOutline": "Designs",
+    "desc": "Spatial brand experiences — environments that speak volumes.",
+    "cardClass": "pano",
+    "color": [
+      220,
+      50,
+      60
+    ],
+    "order": 5,
+    "enabled": true
+  },
+  {
+    "id": "social-media",
+    "key": "social",
+    "label": "Social Media",
+    "titleMain": "Social",
+    "titleOutline": "Media",
+    "desc": "Scroll-stopping visuals designed for the digital feed.",
+    "cardClass": "port",
+    "color": [
+      210,
+      65,
+      155
+    ],
+    "order": 6,
+    "enabled": true
+  }
+]

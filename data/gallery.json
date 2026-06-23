@@ -1,0 +1,133 @@
+{
+  "concept-art": {
+    "cover": "/images/concept-art/1782131074052-cz3whq.jpg",
+    "strips": [],
+    "mosaic": [
+      "/images/concept-art/Cuphead 4.jpg",
+      "/images/concept-art/1.jpg",
+      "/images/concept-art/Dead island 2 background.jpg"
+    ],
+    "gallery": [
+      {
+        "id": "01",
+        "src": "/images/concept-art/1782130808581-9xva7u.png",
+        "label": "1"
+      },
+      {
+        "id": "02",
+        "src": "/images/concept-art/1782130821422-a3ql3w.jpg",
+        "label": "two cats colored"
+      },
+      {
+        "id": "03",
+        "src": "/images/concept-art/1782136430237-tzoev3.jpg",
+        "label": "two cats"
+      },
+      {
+        "id": "04",
+        "src": "/images/concept-art/1782139161449-2ngfmp.jpg",
+        "label": "Dead island 2 background"
+      },
+      {
+        "id": "05",
+        "src": "/images/concept-art/1782160350916-jt9a0h.png",
+        "label": "image"
+      },
+      {
+        "id": "06",
+        "src": "/images/concept-art/1782166115314-aj0zsi.jpg",
+        "label": "shawn white 2"
+      }
+    ]
+  },
+  "storyboards": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  },
+  "branding": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  },
+  "logos": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  },
+  "pixel-art": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  },
+  "booth": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  },
+  "social": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  },
+  "custom-1782138979744": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  },
+  "custom-1782138980826": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  },
+  "custom-1782139002183": {
+    "cover": null,
+    "strips": [],
+    "mosaic": [
+      null,
+      null,
+      null
+    ],
+    "gallery": []
+  }
+}

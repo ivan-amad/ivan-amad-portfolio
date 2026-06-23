@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Ivan Amad — Visual Art Director</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#000;--white:#fff;
+  --g1:#0a0a0a;--g2:#111;--g3:#1c1c1c;--g4:#2e2e2e;--g5:#555;--g6:#888;--g7:#bbb;--g8:#e0e0e0;
+  --ease:cubic-bezier(.25,.46,.45,.94);
+  --ease2:cubic-bezier(.76,0,.24,1);
+  --cur-px:255,255,255;
+}
+/* ── LIGHT MODE ── */
+body.light{
+  --black:#fff;--white:#000;
+  --g1:#f5f5f5;--g2:#ebebeb;--g3:#d8d8d8;--g4:#bfbfbf;--g5:#888;--g6:#555;--g7:#222;--g8:#111;
+  --cur-px:0,0,0;
+}
+body.light::selection{background:var(--black);color:var(--white)}
+body.light #grain{filter:invert(1)}
+body.light .ch-cover-bg::before{background:repeating-linear-gradient(135deg,transparent,transparent 40px,rgba(0,0,0,.025) 40px,rgba(0,0,0,.025) 41px)}
+body.light .ch-scroll-label{color:rgba(0,0,0,.3)}
+body.light .ch-cover-num{color:rgba(0,0,0,.06)}
+body.light .ch-cover-bg{background:var(--g2)}
+body.light .ch-cover{background:var(--g2)}
+body.light .gal-card::before{background:linear-gradient(rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.025) 1px,transparent 1px);background-size:24px 24px}
+body.light .lb-ph::before{background:linear-gradient(rgba(0,0,0,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.018) 1px,transparent 1px);background-size:36px 36px}
+body.light .lb-ph-num{color:rgba(0,0,0,.05)}
+body.light #lb{background:rgba(255,255,255,.97)}
+body.light .hn-line:nth-child(2) span{-webkit-text-stroke:1.5px var(--white)}
+body.light .intro-title span{-webkit-text-stroke:1px var(--white)}
+body.light .ch-title .ol{-webkit-text-stroke:1px var(--white)}
+body.light .ft-title span{-webkit-text-stroke:1px var(--white)}
+body.light .ft-mq-word.ol{-webkit-text-stroke:1px rgba(0,0,0,.2)}
+body.light .ch-mq-word{color:rgba(0,0,0,.07)}
+body.light .ch-mq-word.outline{-webkit-text-stroke:1px rgba(0,0,0,.18);color:transparent}
+body.light .ft-mq-word{color:rgba(0,0,0,.06)}
+body.light .nav-chapters a::after{background:var(--white)}
+body.light #nav{mix-blend-mode:normal}
+body.light #cur-r{border-color:rgba(0,0,0,.35)}
+body.light body.ch #cur-r{border-color:rgba(0,0,0,.6)}
+
+/* ── THEME TOGGLE BUTTON ── */
+#theme-btn{
+  position:fixed;bottom:32px;right:32px;z-index:8500;
+  width:52px;height:52px;
+  background:var(--white);color:var(--black);
+  border:1px solid var(--g4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  transition:background .45s,color .45s,border-color .45s,transform .25s;
+  overflow:hidden;
+  writing-mode:vertical-rl;
+}
+#theme-btn:hover{transform:scale(1.08)}
+#theme-btn .tb-icon{font-size:16px;writing-mode:horizontal-tb;line-height:1}
+
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:'Poppins',sans-serif;font-weight:300;overflow-x:hidden;cursor:none;transition:background .45s,color .45s}
+body.no-scroll{overflow:hidden}
+
+/* ── LOADING SCREEN ── */
+/* ── LOADER — origami / clay stop-motion ── */
+#loader{
+  position:fixed;inset:0;z-index:99999;background:#0a0900;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;cursor:none!important;
+}
+/* ambient yellow glow behind name */
+#ld-glow{
+  position:absolute;top:50%;left:50%;
+  width:clamp(400px,70vw,900px);height:clamp(200px,40vh,500px);
+  transform:translate(-50%,-55%);
+  background:radial-gradient(ellipse at 50% 55%,rgba(255,210,0,.12) 0%,transparent 70%);
+  z-index:1;pointer-events:none;
+  filter:blur(40px);
+  opacity:0;transition:opacity 2s;
+}
+#loader.glow-on #ld-glow{opacity:1}
+
+/* frame number — top-left, like a stop-motion reference marker */
+#ld-frame{
+  position:absolute;top:28px;left:32px;z-index:8;
+  font-size:9px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(255,210,0,.28);font-variant-numeric:tabular-nums;
+}
+
+/* grain canvas */
+#ld-grain{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:.055}
+
+/* ── letter stage ── */
+#ld-stage{
+  position:relative;z-index:4;
+  display:flex;flex-direction:column;align-items:center;
+  gap:.02em;perspective:1200px;perspective-origin:50% 40%;
+}
+.ld-row{display:flex;gap:.01em;line-height:.88;overflow:visible}
+
+/* ── individual character ── */
+.ld-ch{
+  display:inline-block;
+  font-family:'Poppins',sans-serif;
+  font-weight:900;
+  font-size:clamp(68px,14vw,200px);
+  letter-spacing:-.04em;
+  color:#FFD600;
+  position:relative;
+  transform-origin:50% 100%;
+  transform:perspective(900px) rotateX(88deg) translateY(-24px) scale(.72);
+  opacity:0;
+
+  /* origami multi-layer paper shadow — hard offsets, zero blur = folded paper planes */
+  text-shadow:
+    0   2px 0  #F0C800,
+    0   4px 0  #D4A800,
+    0   6px 0  #B08600,
+    0   8px 0  #8A6200,
+    0  10px 0  #5C3E00,
+    0  12px 4px rgba(0,0,0,.55),
+    0  18px 12px rgba(0,0,0,.22);
+
+  /* fold crease highlight — top-left bevel like folded paper */
+  -webkit-text-stroke:0px transparent;
+  filter:drop-shadow(-2px -1px 0 rgba(255,240,120,.35));
+}
+
+/* stop-motion fold-in: step-end inside each keyframe = frame holds, then jumps */
+.ld-ch.drop{
+  animation:ch-drop var(--cd,.72s) linear var(--dd,0s) forwards;
+}
+@keyframes ch-drop{
+  0%  {animation-timing-function:step-end;opacity:0; transform:perspective(900px) rotateX(90deg) translateY(-32px) scale(.68) rotate(-1.5deg);}
+  11% {animation-timing-function:step-end;opacity:1; transform:perspective(900px) rotateX(74deg) translateY(-26px) scale(.74) rotate(.8deg) translateX(2px);}
+  22% {animation-timing-function:step-end;opacity:1; transform:perspective(900px) rotateX(58deg) translateY(-19px) scale(.80) rotate(-1deg) translateX(-1px);}
+  33% {animation-timing-function:step-end;opacity:1; transform:perspective(900px) rotateX(42deg) translateY(-12px) scale(.87) rotate(.5deg) translateX(1px);}
+  44% {animation-timing-function:step-end;opacity:1; transform:perspective(900px) rotateX(26deg) translateY(-6px)  scale(.93) rotate(-.6deg) translateX(-2px);}
+  55% {animation-timing-function:step-end;opacity:1; transform:perspective(900px) rotateX(11deg) translateY(-2px)  scale(.98) rotate(.3deg) translateX(1px);}
+  66% {animation-timing-function:step-end;opacity:1; transform:perspective(900px) rotateX(-7deg) translateY(6px)   scale(1.06) rotate(-.4deg);} /* overshoot/squash */
+  77% {animation-timing-function:step-end;opacity:1; transform:perspective(900px) rotateX(4deg)  translateY(-3px)  scale(1.01) rotate(.2deg);}
+  88% {animation-timing-function:step-end;opacity:1; transform:perspective(900px) rotateX(-2deg) translateY(1px)   scale(.995) rotate(-.1deg);}
+  100%{opacity:1;transform:perspective(900px) rotateX(0deg) translateY(0) scale(1) rotate(0deg);}
+}
+
+/* idle stop-motion breathing — tiny stepped wobble */
+.ld-ch.idle{
+  animation:ch-idle 3.8s step-end var(--id,0s) infinite;
+}
+@keyframes ch-idle{
+  0%  {transform:scale(1)     rotate(0deg)    translateY(0);}
+  20% {transform:scale(1.007) rotate(.25deg)  translateY(-1px);}
+  40% {transform:scale(.995)  rotate(-.2deg)  translateY(1px);}
+  60% {transform:scale(1.004) rotate(.15deg)  translateY(0px);}
+  80% {transform:scale(.998)  rotate(-.12deg) translateY(1px);}
+  100%{transform:scale(1)     rotate(0deg)    translateY(0);}
+}
+
+/* stage shake when letter lands */
+#ld-stage.shake{animation:st-shake .22s step-end}
+@keyframes st-shake{
+  0%  {transform:translate(0,0) rotate(0deg)}
+  25% {transform:translate(-2px,1px) rotate(-.15deg)}
+  50% {transform:translate(1px,-2px) rotate(.1deg)}
+  75% {transform:translate(-1px,1px) rotate(-.08deg)}
+  100%{transform:translate(0,0) rotate(0deg)}
+}
+
+/* subtitle / role */
+#ld-role{
+  position:relative;z-index:5;
+  font-size:clamp(8px,.9vw,11px);font-weight:600;letter-spacing:.65em;text-transform:uppercase;
+  color:rgba(255,210,0,.3);margin-top:18px;
+  opacity:0;transition:opacity 1.4s .4s;
+}
+#ld-role.show{opacity:1}
+
+/* click hint */
+#ld-hint{
+  position:relative;z-index:5;
+  font-size:clamp(8px,.85vw,10px);font-weight:600;letter-spacing:.55em;text-transform:uppercase;
+  color:rgba(255,210,0,.45);margin-top:10px;
+  opacity:0;transition:opacity 1.2s;
+}
+#ld-hint.show{opacity:1}
+
+/* yellow progress bar */
+#ld-bar-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;z-index:8;background:rgba(255,210,0,.07)}
+#ld-bar{height:100%;width:0%;background:#FFD600;transition:width .1s linear}
+
+/* exit wipe */
+#loader.wipe{animation:ld-wipe .9s cubic-bezier(.76,0,.24,1) forwards}
+@keyframes ld-wipe{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 0 100% 0)}}
+
+/* ── PAGE TRANSITION WIPE ── */
+#wipe{
+  position:fixed;inset:0;z-index:9600;
+  background:var(--black);
+  clip-path:inset(0 0 100% 0);
+  pointer-events:none;
+  transition:none;
+}
+#wipe.in{
+  clip-path:inset(0 0 0% 0);
+  transition:clip-path .45s cubic-bezier(.76,0,.24,1);
+}
+#wipe.out{
+  clip-path:inset(100% 0 0% 0);
+  transition:clip-path .45s cubic-bezier(.76,0,.24,1);
+}
+
+/* ── NAV CHAPTER COUNTER ── */
+#nav-chap{
+  font-size:9px;font-weight:600;letter-spacing:.25em;color:var(--g5);
+  display:flex;align-items:center;gap:10px;
+  transition:color .3s;
+}
+#nav-chap-name{color:var(--g6);font-weight:700;text-transform:uppercase;letter-spacing:.22em;font-size:8px}
+#nav-chap-num{color:var(--g4);font-size:8px}
+::selection{background:var(--white);color:var(--black)}
+a{text-decoration:none;color:inherit;cursor:none}
+button{cursor:none;border:none;background:none;font-family:inherit;color:inherit}
+img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* ── CURSOR ── */
+#cur{position:fixed;top:0;left:0;z-index:9999;width:7px;height:7px;background:var(--white);pointer-events:none;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .45s}
+#cur-r{position:fixed;top:0;left:0;z-index:9998;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.35);pointer-events:none;transform:translate(-50%,-50%);transition:width .35s var(--ease),height .35s var(--ease),border-color .45s}
+body.ch #cur{width:3px;height:3px}
+body.ch #cur-r{width:64px;height:64px;border-color:rgba(255,255,255,.65)}
+body.light #cur{background:var(--white)}
+body.light #cur-r{border-color:rgba(0,0,0,.35)}
+body.light.ch #cur-r{border-color:rgba(0,0,0,.6)}
+/* pixel particle canvas */
+#px-canvas{position:fixed;inset:0;pointer-events:none;z-index:9997;width:100%;height:100%}
+
+/* ── GRAIN ── */
+#grain{position:fixed;inset:0;pointer-events:none;z-index:8900;opacity:.038;width:100%;height:100%}
+
+/* ── NAV ── */
+#nav{position:fixed;top:0;left:0;right:0;z-index:8000;display:flex;align-items:center;justify-content:space-between;padding:26px clamp(20px,5vw,64px);mix-blend-mode:difference}
+#nav-logo{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--white)}
+.nav-chapters{display:flex;gap:28px;list-style:none}
+.nav-chapters a{font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--g6);transition:color .3s;position:relative}
+.nav-chapters a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--white);transition:width .3s}
+.nav-chapters a:hover{color:var(--white)}
+.nav-chapters a:hover::after{width:100%}
+#nav-burger{display:none;flex-direction:column;gap:5px}
+.b-line{display:block;width:26px;height:1.5px;background:var(--white);transition:.35s var(--ease);transform-origin:right}
+@media(max-width:860px){.nav-chapters{display:none}#nav-burger{display:flex}}
+
+/* ── NAV OVERLAY ── */
+#nav-ol{position:fixed;inset:0;z-index:7500;background:var(--white);clip-path:inset(0 0 100% 0);transition:clip-path .7s var(--ease2);pointer-events:none;display:flex;align-items:center;padding-left:clamp(32px,10vw,140px)}
+#nav-ol.open{clip-path:inset(0 0 0% 0);pointer-events:all}
+#nav-burger.open .b-line:nth-child(1){transform:rotate(-45deg) translateY(4px)}
+#nav-burger.open .b-line:nth-child(2){opacity:0}
+#nav-burger.open .b-line:nth-child(3){transform:rotate(45deg) translateY(-4px)}
+.ol-list{list-style:none}
+.ol-item{overflow:hidden;margin-bottom:2px}
+.ol-link{display:inline-flex;align-items:baseline;gap:18px;font-size:clamp(28px,5vw,64px);font-weight:800;letter-spacing:-.03em;color:var(--black);transform:translateY(110%);transition:transform .6s var(--ease),color .2s;line-height:1.1}
+#nav-ol.open .ol-link{transform:translateY(0)}
+.ol-link:hover{color:var(--g5)}
+.ol-n{font-size:10px;font-weight:300;letter-spacing:.15em;color:var(--g5);min-width:24px}
+.ol-item:nth-child(1) .ol-link{transition-delay:.04s}
+.ol-item:nth-child(2) .ol-link{transition-delay:.09s}
+.ol-item:nth-child(3) .ol-link{transition-delay:.13s}
+.ol-item:nth-child(4) .ol-link{transition-delay:.17s}
+.ol-item:nth-child(5) .ol-link{transition-delay:.21s}
+.ol-item:nth-child(6) .ol-link{transition-delay:.25s}
+.ol-item:nth-child(7) .ol-link{transition-delay:.29s}
+.ol-item:nth-child(8) .ol-link{transition-delay:.33s}
+.ol-item:nth-child(9) .ol-link{transition-delay:.36s}
+
+/* ── HERO ── */
+#hero{position:relative;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#hero-cv{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.hero-c{position:relative;z-index:1;text-align:center;pointer-events:none}
+.hero-pre{font-size:10px;font-weight:600;letter-spacing:.45em;text-transform:uppercase;color:var(--g5);margin-bottom:24px;opacity:0;transform:translateY(14px);animation:fu .8s var(--ease) .5s forwards}
+.hero-name{font-size:clamp(72px,15vw,210px);font-weight:900;line-height:.85;letter-spacing:-.05em;overflow:hidden}
+.hn-line{display:block;overflow:hidden}
+.hn-line span{display:block;opacity:0;transform:translateY(102%);animation:su .9s var(--ease) forwards}
+.hn-line:nth-child(1) span{animation-delay:.2s}
+.hn-line:nth-child(2) span{animation-delay:.35s;-webkit-text-stroke:1.5px var(--white);color:transparent}
+.hero-sub{font-size:11px;font-weight:300;letter-spacing:.3em;text-transform:uppercase;color:var(--g6);margin-top:28px;opacity:0;transform:translateY(14px);animation:fu .8s var(--ease) .85s forwards}
+@keyframes fu{to{opacity:1;transform:translateY(0)}}
+@keyframes su{to{opacity:1;transform:translateY(0)}}
+.scroll-hint{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:fu .6s var(--ease) 1.3s forwards}
+.sh-line{width:1px;height:56px;background:var(--g4);position:relative;overflow:hidden}
+.sh-line::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:100%;background:linear-gradient(transparent,var(--white),transparent);animation:sd 2s ease-in-out 1.8s infinite}
+@keyframes sd{0%{top:-100%}100%{top:200%}}
+.sh-text{font-size:8px;font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--g5)}
+
+/* ── INTRO (About) ── */
+#intro{padding:clamp(80px,12vh,160px) clamp(20px,7vw,100px);border-bottom:1px solid var(--g3)}
+.intro-label{font-size:9px;font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--g5);margin-bottom:48px;display:flex;align-items:center;gap:14px}
+.intro-label::before{content:'';width:32px;height:1px;background:var(--g4)}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,8vw,120px);align-items:center}
+.intro-title{font-size:clamp(40px,7vw,96px);font-weight:900;letter-spacing:-.04em;line-height:.9;margin-bottom:32px}
+.intro-title span{-webkit-text-stroke:1px var(--white);color:transparent}
+.intro-body{font-size:clamp(13px,1.3vw,16px);font-weight:300;color:var(--g7);line-height:1.85;max-width:440px}
+.intro-divider{width:36px;height:1px;background:var(--g4);margin:24px 0}
+.intro-tags{display:flex;flex-wrap:wrap;gap:8px}
+.i-tag{font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--g4);padding:6px 12px;color:var(--g5);transition:.3s}
+.i-tag:hover{border-color:var(--white);color:var(--white)}
+
+/* ── STRIP (horizontal repeating images — like indigo-lab ring strips) ── */
+.img-strip{overflow:hidden;padding:0;border-top:1px solid var(--g3);border-bottom:1px solid var(--g3)}
+.strip-row{display:flex;gap:3px;padding:3px 0}
+.strip-row:nth-child(2){margin-top:3px}
+.strip-inner{display:flex;gap:3px;animation:mrq 32s linear infinite}
+.strip-inner.rev{animation-direction:reverse;animation-duration:28s}
+@keyframes mrq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.strip-card{flex:0 0 auto;width:clamp(100px,12vw,160px);height:clamp(70px,9vw,110px);background:var(--g3);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.strip-card span{font-size:8px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--g5)}
+/* TO REPLACE strip-card: add <img src="your-work.jpg" /> inside each .strip-card */
+
+/* ── CHAPTER WRAPPER ── */
+.chapter{border-bottom:1px solid var(--g3)}
+
+/* CHAPTER COVER — full viewport placeholder */
+.ch-cover{
+  position:relative;height:100vh;
+  background:var(--g2);
+  display:flex;align-items:flex-end;
+  overflow:hidden;
+}
+.ch-cover-bg{
+  position:absolute;inset:0;
+  /* TO REPLACE: add <img src="your-cover.jpg" class="ch-cover-img"> and remove background */
+  background:var(--g2);
+}
+/* subtle diagonal lines texture on cover */
+.ch-cover-bg::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(135deg,transparent,transparent 40px,rgba(255,255,255,.012) 40px,rgba(255,255,255,.012) 41px);
+}
+.ch-cover-meta{position:relative;z-index:1;padding:clamp(32px,5vw,72px);width:100%}
+.ch-scroll-label{position:absolute;top:clamp(90px,12vh,130px);left:clamp(20px,5vw,64px);font-size:9px;font-weight:600;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.3);writing-mode:vertical-rl;transform:rotate(180deg)}
+.ch-cover-num{font-size:clamp(100px,20vw,260px);font-weight:900;letter-spacing:-.06em;color:rgba(255,255,255,.035);position:absolute;bottom:0;right:clamp(20px,5vw,60px);line-height:.85;pointer-events:none;user-select:none}
+
+/* CHAPTER HEADER LABELS (like [first] [TALE]) */
+.ch-tags{display:flex;gap:16px;margin-bottom:16px}
+.ch-tag-bracket{font-size:9px;font-weight:300;letter-spacing:.3em;text-transform:uppercase;color:var(--g5);font-style:italic}
+.ch-tag-bracket.bold{font-weight:700;font-style:normal;color:var(--g7)}
+
+/* CHAPTER CONTENT */
+.ch-body{padding:clamp(64px,9vh,120px) clamp(20px,7vw,100px)}
+.ch-num-label{font-size:8px;font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--g5);margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.ch-num-label::before{content:'';width:28px;height:1px;background:var(--g4)}
+.ch-title{font-size:clamp(48px,9vw,130px);font-weight:900;letter-spacing:-.04em;line-height:.88;margin-bottom:24px}
+.ch-title .ol{-webkit-text-stroke:1px var(--white);color:transparent}
+.ch-desc{font-size:clamp(13px,1.3vw,16px);font-weight:300;color:var(--g6);max-width:480px;line-height:1.8;margin-bottom:60px}
+
+/* CHAPTER MARQUEE (like NOMADIC- -RHYTHM) */
+.ch-marquee{overflow:hidden;padding:20px 0;border-top:1px solid var(--g3);border-bottom:1px solid var(--g3);margin-bottom:64px;white-space:nowrap}
+.ch-mq-inner{display:inline-flex;gap:32px;animation:mrq 22s linear infinite}
+.ch-mq-word{font-size:clamp(28px,5vw,72px);font-weight:900;letter-spacing:-.03em;color:rgba(255,255,255,.06);text-transform:uppercase}
+.ch-mq-word.outline{-webkit-text-stroke:1px rgba(255,255,255,.15);color:transparent}
+
+/* CHAPTER IMAGE MOSAIC (3 images like indigo-lab head layout) */
+.ch-mosaic{display:grid;grid-template-columns:1fr 2fr 1fr;gap:3px;margin-bottom:60px}
+.mosaic-img{background:var(--g3);position:relative;overflow:hidden}
+.mosaic-img.tall{height:clamp(200px,30vw,440px)}
+.mosaic-img.main{height:clamp(200px,30vw,440px)}
+.mosaic-img span{position:absolute;bottom:12px;left:12px;font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--g5)}
+/* TO REPLACE: add <img src="…"> inside each .mosaic-img */
+
+/* CHAPTER STATEMENT */
+.ch-statement{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,8vw,120px);align-items:center;margin-bottom:64px}
+.ch-statement-quote{font-size:clamp(14px,1.5vw,18px);font-weight:300;color:var(--g7);line-height:1.85;font-style:italic}
+.ch-statement-big{height:clamp(200px,28vw,400px);background:var(--g3);position:relative;overflow:hidden}
+.ch-statement-big span{position:absolute;bottom:14px;left:14px;font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--g5)}
+
+/* CHAPTER GALLERY (collection) */
+.ch-gallery-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px}
+.ch-gallery-title{font-size:11px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--white)}
+.ch-gallery-count{font-size:10px;font-weight:300;letter-spacing:.2em;color:var(--g5)}
+
+/* gallery horizontal scroll */
+.ch-gal{display:flex;gap:3px;overflow:hidden}
+.ch-gal-track{display:flex;gap:3px;transition:transform .7s var(--ease)}
+.gal-card{flex:0 0 auto;position:relative;overflow:hidden;background:var(--g3);cursor:none}
+.gal-card.w{width:clamp(200px,28vw,380px);height:clamp(150px,20vw,280px)}
+.gal-card.t{width:clamp(130px,15vw,200px);height:clamp(200px,26vw,360px)}
+.gal-card.s{width:clamp(160px,18vw,240px);height:clamp(160px,18vw,240px)}
+.gal-card.p{width:clamp(110px,12vw,160px);height:clamp(180px,22vw,300px)}
+.gal-card::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:24px 24px;z-index:0}
+.gal-card-inner{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:background .4s}
+.gal-card:hover .gal-card-inner{background:rgba(255,255,255,.05)}
+.gal-num{font-size:clamp(36px,5vw,60px);font-weight:900;color:rgba(255,255,255,.05);letter-spacing:-.04em;line-height:1}
+.gal-cat{font-size:8px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--g5)}
+.gal-hover{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.65);display:flex;flex-direction:column;justify-content:flex-end;padding:14px 16px;opacity:0;transition:opacity .35s var(--ease)}
+.gal-card:hover .gal-hover{opacity:1}
+.gal-hover-label{font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--white)}
+
+/* gallery nav */
+.gal-controls{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid var(--g3);margin-top:3px}
+.gal-nav{display:flex;gap:8px}
+.gal-btn{width:40px;height:40px;border:1px solid var(--g4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;transition:.3s}
+.gal-btn:hover{background:var(--white);border-color:var(--white);color:var(--black)}
+.gal-ctr{font-size:10px;font-weight:300;letter-spacing:.2em;color:var(--g5)}
+.gal-dots{display:flex;gap:5px;align-items:center}
+.gal-dot{width:4px;height:4px;background:var(--g4);transition:.3s}
+.gal-dot.on{background:var(--white);width:14px}
+
+/* CHAPTER OUTRO */
+.ch-outro{padding:clamp(48px,7vh,80px) clamp(20px,7vw,100px);border-top:1px solid var(--g3);display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap}
+.ch-outro-quote{font-size:clamp(13px,1.4vw,17px);font-weight:300;font-style:italic;color:var(--g6);max-width:480px;line-height:1.75}
+.ch-outro-author{font-size:9px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--g5);margin-top:16px}
+.ch-outro-links{display:flex;gap:16px;align-items:center}
+.outro-btn{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--g4);padding:12px 24px;color:var(--white);transition:.35s}
+.outro-btn:hover{background:var(--white);color:var(--black);border-color:var(--white)}
+.outro-btn.outline-btn{background:transparent}
+
+/* ── LET'S TALK ── */
+#links-ch{padding:clamp(80px,10vh,140px) clamp(20px,7vw,100px);border-bottom:1px solid var(--g3)}
+.talk-eyebrow{font-size:9px;font-weight:600;letter-spacing:.45em;text-transform:uppercase;color:var(--g5);margin-bottom:24px;display:flex;align-items:center;gap:14px}
+.talk-eyebrow::before{content:'';width:32px;height:1px;background:var(--g4)}
+.talk-headline{font-size:clamp(56px,10vw,150px);font-weight:900;letter-spacing:-.05em;line-height:.88;margin-bottom:20px}
+.talk-headline span{-webkit-text-stroke:1px var(--white);color:transparent}
+.talk-sub{font-size:clamp(13px,1.3vw,15px);font-weight:300;color:var(--g6);max-width:440px;line-height:1.8;margin-bottom:56px}
+/* big CTA button */
+.talk-cta{display:inline-flex;align-items:center;gap:16px;font-size:11px;font-weight:700;letter-spacing:.35em;text-transform:uppercase;border:1px solid var(--g4);padding:20px 48px;color:var(--white);transition:.4s var(--ease);position:relative;overflow:hidden;margin-bottom:72px}
+.talk-cta::after{content:'';position:absolute;inset:0;background:var(--white);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease);z-index:0}
+.talk-cta:hover::after{transform:scaleX(1)}
+.talk-cta span,.talk-cta .cta-arr{position:relative;z-index:1;transition:color .4s}
+.talk-cta:hover span,.talk-cta:hover .cta-arr{color:var(--black)}
+.cta-arr{font-size:18px;transition:transform .4s var(--ease),color .4s!important}
+.talk-cta:hover .cta-arr{transform:translateX(5px)}
+/* contact cards grid */
+.talk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+@media(max-width:1100px){.talk-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.talk-grid{grid-template-columns:1fr 1fr}}
+.talk-card{padding:32px 28px;background:var(--g2);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;transition:.4s var(--ease)}
+.talk-card::after{content:'';position:absolute;inset:0;background:var(--white);transform:scaleY(0);transform-origin:bottom;transition:transform .5s var(--ease);z-index:0}
+.talk-card:hover::after{transform:scaleY(1)}
+.tc-icon,.tc-label,.tc-val,.tc-arr{position:relative;z-index:1;transition:color .38s}
+.talk-card:hover .tc-icon,.talk-card:hover .tc-label,.talk-card:hover .tc-val,.talk-card:hover .tc-arr{color:var(--black)}
+.tc-icon{font-size:22px;color:var(--g5);line-height:1;margin-bottom:4px;font-style:normal}
+.tc-label{font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--g5)}
+.tc-val{font-size:clamp(10px,1.1vw,13px);font-weight:400;color:var(--g7);word-break:break-all;line-height:1.4}
+.tc-arr{font-size:11px;font-weight:700;color:var(--g4);margin-top:auto}
+.lc-arr{font-size:20px;color:var(--g5)}
+
+/* ── FOOTER ── */
+#footer{text-align:center;padding:clamp(80px,12vh,140px) clamp(20px,6vw,80px) 60px;border-top:1px solid var(--g3)}
+.ft-eyebrow{font-size:9px;font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--g5);margin-bottom:32px}
+.ft-title{font-size:clamp(32px,6vw,88px);font-weight:900;letter-spacing:-.04em;line-height:.9;margin-bottom:32px}
+.ft-title span{-webkit-text-stroke:1px var(--white);color:transparent}
+.ft-sub{font-size:10px;font-weight:300;letter-spacing:.3em;text-transform:uppercase;color:var(--g5);margin-bottom:60px}
+.ft-links{display:flex;align-items:center;justify-content:center;gap:40px;margin-bottom:64px;flex-wrap:wrap}
+.ft-link{font-size:10px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--g6);transition:color .3s;display:flex;gap:8px;align-items:center}
+.ft-link:hover{color:var(--white)}
+.ft-copy{font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--g4)}
+.ft-marquee{overflow:hidden;white-space:nowrap;padding:18px 0;border-top:1px solid var(--g3);border-bottom:1px solid var(--g3);margin:48px 0}
+.ft-mq-inner{display:inline-flex;animation:mrq 20s linear infinite}
+.ft-mq-word{font-size:clamp(20px,3.5vw,48px);font-weight:900;letter-spacing:-.03em;color:rgba(255,255,255,.05);text-transform:uppercase;padding:0 24px}
+.ft-mq-word.ol{-webkit-text-stroke:1px rgba(255,255,255,.12);color:transparent}
+
+/* ── SCROLL PROGRESS BAR ── */
+#progress-bar{position:fixed;top:0;left:0;height:2px;background:var(--white);z-index:9500;width:0%;transition:width .1s linear,background .45s}
+
+/* ── REVEAL ── */
+.rv{opacity:0;transform:translateY(32px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.32s}.rv.d4{transition-delay:.44s}
+
+/* ── SCATTER TEXT ── */
+/* Each .ch-title gets character spans injected by JS */
+.ch-title .sc-char{
+  display:inline-block;
+  opacity:0;
+  transform:translate(var(--scx,0px), var(--scy,0px)) rotate(var(--scr,0deg)) scale(.7);
+  transition:opacity .55s var(--ease), transform .7s var(--ease);
+  transition-delay:var(--scd,0s);
+  will-change:transform,opacity;
+}
+.ch-title .sc-char.is-space{display:inline;width:.28em}
+.ch-title .sc-char.is-br{display:block;height:0;overflow:hidden}
+.ch-title.sc-revealed .sc-char{
+  opacity:1;
+  transform:none;
+}
+/* outline chars inherit the parent's .ol stroke */
+.ch-title .sc-char.is-ol{
+  -webkit-text-stroke:1px var(--white);
+  color:transparent;
+}
+/* Scramble overlay text — floats beside real text while scrambling */
+.sc-glitch{
+  display:inline-block;
+  font-family:'Poppins',sans-serif;
+  font-weight:900;
+  letter-spacing:-.04em;
+  color:rgba(255,255,255,.12);
+  position:absolute;
+  pointer-events:none;
+  user-select:none;
+}
+body.light .sc-glitch{color:rgba(0,0,0,.12)}
+
+/* ── PARALLAX covers — JS sets --py on each .ch-cover-bg ── */
+.ch-cover-bg{transform:translateY(var(--py,0px));will-change:transform;transition:none}
+/* fix cover overflow */
+.ch-cover{overflow:hidden}
+
+/* ── LIGHTBOX ── */
+#lb{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .45s;backdrop-filter:blur(8px)}
+#lb.open{opacity:1;pointer-events:all}
+.lb-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:22px clamp(20px,5vw,60px);border-bottom:1px solid var(--g3)}
+.lb-info{display:flex;flex-direction:column;gap:3px}
+#lb-cat{font-size:8px;font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--g5)}
+#lb-title{font-size:13px;font-weight:700;color:var(--white)}
+#lb-ctr{font-size:10px;font-weight:300;letter-spacing:.2em;color:var(--g5)}
+#lb-x{font-size:9px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--g5);transition:color .3s;display:flex;align-items:center;gap:10px}
+#lb-x::before{content:'';width:18px;height:1px;background:currentColor;transition:width .3s}
+#lb-x:hover{color:var(--white)}#lb-x:hover::before{width:30px}
+.lb-stage{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+.lb-wrap{transform:scale(.86);opacity:0;transition:transform .5s var(--ease),opacity .4s;max-width:90vw;max-height:82vh;display:flex;align-items:center;justify-content:center}
+#lb.open .lb-wrap{transform:scale(1);opacity:1}
+.lb-ph{background:var(--g2);width:clamp(300px,74vw,920px);height:clamp(200px,62vh,660px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;position:relative;overflow:hidden}
+.lb-ph::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:36px 36px}
+.lb-ph-num{font-size:clamp(80px,14vw,190px);font-weight:900;color:rgba(255,255,255,.04);letter-spacing:-.06em;line-height:1;position:relative;z-index:1}
+.lb-ph-label{font-size:clamp(14px,2vw,22px);font-weight:700;color:rgba(255,255,255,.4);position:relative;z-index:1;letter-spacing:-.01em}
+.lb-ph-hint{font-size:9px;font-weight:300;letter-spacing:.3em;text-transform:uppercase;color:var(--g4);position:relative;z-index:1}
+.lb-arr{position:absolute;top:50%;z-index:2;transform:translateY(-50%);width:48px;height:48px;border:1px solid var(--g4);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;transition:.3s;background:rgba(0,0,0,.4);backdrop-filter:blur(4px)}
+.lb-arr:hover{background:var(--white);border-color:var(--white);color:var(--black)}
+#lb-prev{left:clamp(12px,3vw,40px)}#lb-next{right:clamp(12px,3vw,40px)}
+.lb-dots-wrap{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.lb-d{width:4px;height:4px;background:var(--g4);transition:.3s}.lb-d.on{background:var(--white);width:14px}
+.lb-wrap.so{transform:scale(.9) translateX(-24px)!important;opacity:0!important;transition:transform .22s var(--ease),opacity .18s}
+.lb-wrap.si{transform:scale(.9) translateX(24px)!important;opacity:0!important}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .intro-grid,.ch-statement,.ch-mosaic{grid-template-columns:1fr}
+  .links-grid{grid-template-columns:1fr}
+  .ch-mosaic .mosaic-img.tall:last-child{display:none}
+}
+@media(max-width:600px){body{cursor:auto}#cur,#cur-r{display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div id="ld-glow"></div>
+  <canvas id="ld-grain"></canvas>
+  <div id="ld-frame">◼ FRAME 000</div>
+  <div id="ld-stage">
+    <div class="ld-row">
+      <span class="ld-ch" style="--dd:.10s;--id:0s">I</span>
+      <span class="ld-ch" style="--dd:.24s;--id:.18s">V</span>
+      <span class="ld-ch" style="--dd:.38s;--id:.36s">A</span>
+      <span class="ld-ch" style="--dd:.52s;--id:.54s">N</span>
+    </div>
+    <div class="ld-row">
+      <span class="ld-ch" style="--dd:.72s;--id:.12s">A</span>
+      <span class="ld-ch" style="--dd:.86s;--id:.30s">M</span>
+      <span class="ld-ch" style="--dd:1.0s;--id:.48s">A</span>
+      <span class="ld-ch" style="--dd:1.14s;--id:.66s">D</span>
+    </div>
+  </div>
+  <div id="ld-role">Visual Art Director</div>
+  <div id="ld-hint">— Click anywhere to enter —</div>
+  <div id="ld-bar-wrap"><div id="ld-bar"></div></div>
+</div>
+
+<!-- PAGE WIPE -->
+<div id="wipe"></div>
+
+<div id="progress-bar"></div>
+<canvas id="grain"></canvas>
+<canvas id="px-canvas"></canvas>
+<div id="cur"></div><div id="cur-r"></div>
+
+<!-- THEME TOGGLE -->
+<button id="theme-btn" title="Toggle light / dark mode"><span class="tb-icon">◑</span></button>
+
+<!-- LIGHTBOX -->
+<div id="lb">
+  <div class="lb-bar">
+    <div class="lb-info"><span id="lb-cat">—</span><span id="lb-title">—</span></div>
+    <span id="lb-ctr">—</span>
+    <button id="lb-x">✕ &nbsp;Close</button>
+  </div>
+  <div class="lb-stage">
+    <button class="lb-arr" id="lb-prev">←</button>
+    <div class="lb-wrap" id="lb-wrap"></div>
+    <button class="lb-arr" id="lb-next">→</button>
+  </div>
+  <div class="lb-dots-wrap" id="lb-dots"></div>
+</div>
+
+<!-- NAV -->
+<header id="nav">
+  <a href="#hero" id="nav-logo">Ivan Amad</a>
+  <ul class="nav-chapters">
+    <li><a href="#about">About</a></li>
+    <li><a href="#ch-ca">Concept Art</a></li>
+    <li><a href="#ch-sb">Storyboards</a></li>
+    <li><a href="#ch-br">Branding</a></li>
+    <li><a href="#ch-lg">Logos</a></li>
+    <li><a href="#ch-pa">Pixel Art</a></li>
+    <li><a href="#ch-bd">Booth</a></li>
+    <li><a href="#ch-sm">Social</a></li>
+  </ul>
+  <div id="nav-chap">
+    <span id="nav-chap-name">—</span>
+    <span id="nav-chap-num">— / 07</span>
+  </div>
+  <button id="nav-burger"><span class="b-line"></span><span class="b-line"></span><span class="b-line"></span></button>
+</header>
+
+<div id="nav-ol">
+  <ul class="ol-list">
+    <li class="ol-item"><a class="ol-link" href="#about"><span class="ol-n">00</span>About Me</a></li>
+    <li class="ol-item"><a class="ol-link" href="#ch-ca"><span class="ol-n">01</span>Concept Art</a></li>
+    <li class="ol-item"><a class="ol-link" href="#ch-sb"><span class="ol-n">02</span>Storyboards</a></li>
+    <li class="ol-item"><a class="ol-link" href="#ch-br"><span class="ol-n">03</span>Branding</a></li>
+    <li class="ol-item"><a class="ol-link" href="#ch-lg"><span class="ol-n">04</span>Logos</a></li>
+    <li class="ol-item"><a class="ol-link" href="#ch-pa"><span class="ol-n">05</span>Pixel Art</a></li>
+    <li class="ol-item"><a class="ol-link" href="#ch-bd"><span class="ol-n">06</span>Booth Designs</a></li>
+    <li class="ol-item"><a class="ol-link" href="#ch-sm"><span class="ol-n">07</span>Social Media</a></li>
+    <li class="ol-item"><a class="ol-link" href="#links-ch"><span class="ol-n">08</span>My Links</a></li>
+  </ul>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <canvas id="hero-cv"></canvas>
+  <div class="hero-c">
+    <p class="hero-pre">Visual Art Director &nbsp;·&nbsp; Multidisciplinary Designer</p>
+    <h1 class="hero-name">
+      <span class="hn-line"><span>IVAN</span></span>
+      <span class="hn-line"><span>AMAD</span></span>
+    </h1>
+    <p class="hero-sub">7 chapters of craft</p>
+  </div>
+  <div class="scroll-hint">
+    <div class="sh-line"></div>
+    <span class="sh-text">Scroll</span>
+  </div>
+</section>
+
+<!-- ═══ INTRO / ABOUT ═══ -->
+<section id="about">
+<div id="intro">
+  <p class="intro-label rv">About Me</p>
+  <div class="intro-grid">
+    <div class="rv d1">
+      <h2 class="intro-title">Art.<br/><span>Direction.</span><br/>Craft.</h2>
+    </div>
+    <div class="rv d2">
+      <p class="intro-body">I'm Ivan Amad, a visual art director and multidisciplinary designer creating concept art, branding systems, social media visuals, booth designs, storyboards, logos, and pixel art. My work blends cinematic composition, strong visual identity, and experimental digital aesthetics.</p>
+      <div class="intro-divider"></div>
+      <div class="intro-tags">
+        <span class="i-tag">Concept Art</span><span class="i-tag">Storyboards</span><span class="i-tag">Branding</span>
+        <span class="i-tag">Logos</span><span class="i-tag">Pixel Art</span><span class="i-tag">Booth Design</span>
+        <span class="i-tag">Social Media</span><span class="i-tag">Art Direction</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 01 — CONCEPT ART
+════════════════════════════════════════════ -->
+<section id="ch-ca" class="chapter">
+  <!-- COVER -->
+  <div class="ch-cover">
+    <div class="ch-cover-bg"><!-- TO REPLACE: <img src="concept-art-cover.jpg" class="ch-cover-img"> --></div>
+    <span class="ch-scroll-label">Concept Art</span>
+    <div class="ch-cover-meta">
+      <div class="ch-tags"><span class="ch-tag-bracket">[first]</span><span class="ch-tag-bracket bold">[CHAPTER]</span></div>
+    </div>
+    <div class="ch-cover-num">01</div>
+  </div>
+
+  <!-- BODY -->
+  <div class="ch-body">
+    <p class="ch-num-label rv">Chapter 01</p>
+    <h2 class="ch-title rv d1">Concept<br/><span class="ol">Art</span></h2>
+    <p class="ch-desc rv d2">Cinematic worlds built from light, shadow, and imagination. Each piece is a universe waiting to be entered.</p>
+
+    <!-- image strip -->
+    <div class="img-strip rv d3">
+      <div class="strip-row"><div class="strip-inner" id="si-ca1">
+        <div class="strip-card"><span>CA 01</span></div><div class="strip-card"><span>CA 02</span></div>
+        <div class="strip-card"><span>CA 03</span></div><div class="strip-card"><span>CA 04</span></div>
+        <div class="strip-card"><span>CA 05</span></div><div class="strip-card"><span>CA 06</span></div>
+        <div class="strip-card"><span>CA 01</span></div><div class="strip-card"><span>CA 02</span></div>
+        <div class="strip-card"><span>CA 03</span></div><div class="strip-card"><span>CA 04</span></div>
+        <div class="strip-card"><span>CA 05</span></div><div class="strip-card"><span>CA 06</span></div>
+      </div></div>
+      <div class="strip-row"><div class="strip-inner rev" id="si-ca2">
+        <div class="strip-card"><span>CA 07</span></div><div class="strip-card"><span>CA 08</span></div>
+        <div class="strip-card"><span>CA 09</span></div><div class="strip-card"><span>CA 10</span></div>
+        <div class="strip-card"><span>CA 07</span></div><div class="strip-card"><span>CA 08</span></div>
+        <div class="strip-card"><span>CA 09</span></div><div class="strip-card"><span>CA 10</span></div>
+      </div></div>
+    </div>
+
+    <!-- chapter marquee -->
+    <div class="ch-marquee rv">
+      <div class="ch-mq-inner">
+        <span class="ch-mq-word">CONCEPT-</span><span class="ch-mq-word outline">-ART</span>
+        <span class="ch-mq-word">CONCEPT-</span><span class="ch-mq-word outline">-ART</span>
+        <span class="ch-mq-word">CONCEPT-</span><span class="ch-mq-word outline">-ART</span>
+        <span class="ch-mq-word">CONCEPT-</span><span class="ch-mq-word outline">-ART</span>
+      </div>
+    </div>
+
+    <!-- mosaic -->
+    <div class="ch-mosaic rv">
+      <div class="mosaic-img tall"><span>CA — Detail</span></div>
+      <div class="mosaic-img main"><span>CA — Main</span></div>
+      <div class="mosaic-img tall"><span>CA — Detail</span></div>
+    </div>
+
+    <!-- statement -->
+    <div class="ch-statement rv">
+      <p class="ch-statement-quote">"I build worlds before they exist. Every line is a decision, every shadow a story. Concept art is the language between imagination and reality — and I speak it fluently."</p>
+      <div class="ch-statement-big"><span>Lookbook — Concept Art</span></div>
+    </div>
+
+    <!-- gallery -->
+    <div class="rv d1">
+      <div class="ch-gallery-header">
+        <span class="ch-gallery-title">The Collection</span>
+        <span class="ch-gallery-count" id="ctr-ca">01 / 06</span>
+      </div>
+      <div class="ch-gal"><div class="ch-gal-track" id="gal-ca">
+        <div class="gal-card w" onclick="openLB('Concept Art 01')"><div class="gal-card-inner"><span class="gal-num">01</span><span class="gal-cat">Concept Art</span></div><div class="gal-hover"><span class="gal-hover-label">Concept Art 01</span></div></div>
+        <div class="gal-card w" onclick="openLB('Concept Art 02')"><div class="gal-card-inner"><span class="gal-num">02</span><span class="gal-cat">Concept Art</span></div><div class="gal-hover"><span class="gal-hover-label">Concept Art 02</span></div></div>
+        <div class="gal-card w" onclick="openLB('Concept Art 03')"><div class="gal-card-inner"><span class="gal-num">03</span><span class="gal-cat">Concept Art</span></div><div class="gal-hover"><span class="gal-hover-label">Concept Art 03</span></div></div>
+        <div class="gal-card w" onclick="openLB('Concept Art 04')"><div class="gal-card-inner"><span class="gal-num">04</span><span class="gal-cat">Concept Art</span></div><div class="gal-hover"><span class="gal-hover-label">Concept Art 04</span></div></div>
+        <div class="gal-card w" onclick="openLB('Concept Art 05')"><div class="gal-card-inner"><span class="gal-num">05</span><span class="gal-cat">Concept Art</span></div><div class="gal-hover"><span class="gal-hover-label">Concept Art 05</span></div></div>
+        <div class="gal-card w" onclick="openLB('Concept Art 06')"><div class="gal-card-inner"><span class="gal-num">06</span><span class="gal-cat">Concept Art</span></div><div class="gal-hover"><span class="gal-hover-label">Concept Art 06</span></div></div>
+      </div></div>
+      <div class="gal-controls">
+        <div class="gal-nav"><button class="gal-btn" onclick="gP('gal-ca','ctr-ca','gd-ca',6)">←</button><button class="gal-btn" onclick="gN('gal-ca','ctr-ca','gd-ca',6)">→</button></div>
+        <div class="gal-dots" id="gd-ca"><div class="gal-dot on"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- outro -->
+  <div class="ch-outro rv">
+    <div><p class="ch-outro-quote">"Every world I draw begins with a feeling — and ends with a frame that makes you believe it's real."</p><p class="ch-outro-author">— Ivan Amad</p></div>
+    <div class="ch-outro-links">
+      <a class="outro-btn" href="https://www.artstation.com/ivanosh" target="_blank">View on ArtStation ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 02 — STORYBOARDS
+════════════════════════════════════════════ -->
+<section id="ch-sb" class="chapter">
+  <div class="ch-cover">
+    <div class="ch-cover-bg"></div>
+    <span class="ch-scroll-label">Storyboards</span>
+    <div class="ch-cover-meta"><div class="ch-tags"><span class="ch-tag-bracket">[second]</span><span class="ch-tag-bracket bold">[CHAPTER]</span></div></div>
+    <div class="ch-cover-num">02</div>
+  </div>
+  <div class="ch-body">
+    <p class="ch-num-label rv">Chapter 02</p>
+    <h2 class="ch-title rv d1"><span class="ol">Story</span><br/>boards</h2>
+    <p class="ch-desc rv d2">Sequential narratives — frame by frame, scene by scene. The invisible bridge between script and screen.</p>
+    <div class="img-strip rv d3">
+      <div class="strip-row"><div class="strip-inner"><div class="strip-card"><span>SB 01</span></div><div class="strip-card"><span>SB 02</span></div><div class="strip-card"><span>SB 03</span></div><div class="strip-card"><span>SB 04</span></div><div class="strip-card"><span>SB 05</span></div><div class="strip-card"><span>SB 06</span></div><div class="strip-card"><span>SB 01</span></div><div class="strip-card"><span>SB 02</span></div><div class="strip-card"><span>SB 03</span></div><div class="strip-card"><span>SB 04</span></div><div class="strip-card"><span>SB 05</span></div><div class="strip-card"><span>SB 06</span></div></div></div>
+      <div class="strip-row"><div class="strip-inner rev"><div class="strip-card"><span>SB 07</span></div><div class="strip-card"><span>SB 08</span></div><div class="strip-card"><span>SB 09</span></div><div class="strip-card"><span>SB 10</span></div><div class="strip-card"><span>SB 07</span></div><div class="strip-card"><span>SB 08</span></div><div class="strip-card"><span>SB 09</span></div><div class="strip-card"><span>SB 10</span></div></div></div>
+    </div>
+    <div class="ch-marquee rv"><div class="ch-mq-inner"><span class="ch-mq-word">STORY-</span><span class="ch-mq-word outline">-BOARDS</span><span class="ch-mq-word">STORY-</span><span class="ch-mq-word outline">-BOARDS</span><span class="ch-mq-word">STORY-</span><span class="ch-mq-word outline">-BOARDS</span><span class="ch-mq-word">STORY-</span><span class="ch-mq-word outline">-BOARDS</span></div></div>
+    <div class="ch-mosaic rv"><div class="mosaic-img tall"><span>SB — Panel</span></div><div class="mosaic-img main"><span>SB — Scene</span></div><div class="mosaic-img tall"><span>SB — Panel</span></div></div>
+    <div class="ch-statement rv"><p class="ch-statement-quote">"A storyboard is not a drawing — it's a rhythm. I don't just sketch panels, I compose the pace of the eye across a story."</p><div class="ch-statement-big"><span>Lookbook — Storyboards</span></div></div>
+    <div class="rv d1">
+      <div class="ch-gallery-header"><span class="ch-gallery-title">The Collection</span><span class="ch-gallery-count" id="ctr-sb">01 / 06</span></div>
+      <div class="ch-gal"><div class="ch-gal-track" id="gal-sb">
+        <div class="gal-card t" onclick="openLB('Storyboard 01')"><div class="gal-card-inner"><span class="gal-num">01</span><span class="gal-cat">Storyboard</span></div><div class="gal-hover"><span class="gal-hover-label">Storyboard 01</span></div></div>
+        <div class="gal-card t" onclick="openLB('Storyboard 02')"><div class="gal-card-inner"><span class="gal-num">02</span><span class="gal-cat">Storyboard</span></div><div class="gal-hover"><span class="gal-hover-label">Storyboard 02</span></div></div>
+        <div class="gal-card t" onclick="openLB('Storyboard 03')"><div class="gal-card-inner"><span class="gal-num">03</span><span class="gal-cat">Storyboard</span></div><div class="gal-hover"><span class="gal-hover-label">Storyboard 03</span></div></div>
+        <div class="gal-card t" onclick="openLB('Storyboard 04')"><div class="gal-card-inner"><span class="gal-num">04</span><span class="gal-cat">Storyboard</span></div><div class="gal-hover"><span class="gal-hover-label">Storyboard 04</span></div></div>
+        <div class="gal-card t" onclick="openLB('Storyboard 05')"><div class="gal-card-inner"><span class="gal-num">05</span><span class="gal-cat">Storyboard</span></div><div class="gal-hover"><span class="gal-hover-label">Storyboard 05</span></div></div>
+        <div class="gal-card t" onclick="openLB('Storyboard 06')"><div class="gal-card-inner"><span class="gal-num">06</span><span class="gal-cat">Storyboard</span></div><div class="gal-hover"><span class="gal-hover-label">Storyboard 06</span></div></div>
+      </div></div>
+      <div class="gal-controls"><div class="gal-nav"><button class="gal-btn" onclick="gP('gal-sb','ctr-sb','gd-sb',6)">←</button><button class="gal-btn" onclick="gN('gal-sb','ctr-sb','gd-sb',6)">→</button></div><div class="gal-dots" id="gd-sb"><div class="gal-dot on"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div></div></div>
+    </div>
+  </div>
+  <div class="ch-outro rv"><div><p class="ch-outro-quote">"Frame after frame — the story breathes."</p><p class="ch-outro-author">— Ivan Amad</p></div><div class="ch-outro-links"><a class="outro-btn" href="https://www.artstation.com/ivanosh" target="_blank">View on ArtStation ↗</a></div></div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CHAPTER 03 — BRANDING
+════════════════════════════════════════════ -->
+<section id="ch-br" class="chapter">
+  <div class="ch-cover"><div class="ch-cover-bg"></div><span class="ch-scroll-label">Branding</span><div class="ch-cover-meta"><div class="ch-tags"><span class="ch-tag-bracket">[third]</span><span class="ch-tag-bracket bold">[CHAPTER]</span></div></div><div class="ch-cover-num">03</div></div>
+  <div class="ch-body">
+    <p class="ch-num-label rv">Chapter 03</p>
+    <h2 class="ch-title rv d1">Brand<br/><span class="ol">Systems</span></h2>
+    <p class="ch-desc rv d2">Visual identities built to last — cohesive, bold, distinctive. A brand is a promise made visible.</p>
+    <div class="img-strip rv d3"><div class="strip-row"><div class="strip-inner"><div class="strip-card"><span>BR 01</span></div><div class="strip-card"><span>BR 02</span></div><div class="strip-card"><span>BR 03</span></div><div class="strip-card"><span>BR 04</span></div><div class="strip-card"><span>BR 05</span></div><div class="strip-card"><span>BR 06</span></div><div class="strip-card"><span>BR 01</span></div><div class="strip-card"><span>BR 02</span></div><div class="strip-card"><span>BR 03</span></div><div class="strip-card"><span>BR 04</span></div><div class="strip-card"><span>BR 05</span></div><div class="strip-card"><span>BR 06</span></div></div></div><div class="strip-row"><div class="strip-inner rev"><div class="strip-card"><span>BR 07</span></div><div class="strip-card"><span>BR 08</span></div><div class="strip-card"><span>BR 09</span></div><div class="strip-card"><span>BR 07</span></div><div class="strip-card"><span>BR 08</span></div><div class="strip-card"><span>BR 09</span></div></div></div></div>
+    <div class="ch-marquee rv"><div class="ch-mq-inner"><span class="ch-mq-word">BRAND-</span><span class="ch-mq-word outline">-SYSTEMS</span><span class="ch-mq-word">BRAND-</span><span class="ch-mq-word outline">-SYSTEMS</span><span class="ch-mq-word">BRAND-</span><span class="ch-mq-word outline">-SYSTEMS</span><span class="ch-mq-word">BRAND-</span><span class="ch-mq-word outline">-SYSTEMS</span></div></div>
+    <div class="ch-mosaic rv"><div class="mosaic-img tall"><span>BR — Detail</span></div><div class="mosaic-img main"><span>BR — Showcase</span></div><div class="mosaic-img tall"><span>BR — Detail</span></div></div>
+    <div class="ch-statement rv"><p class="ch-statement-quote">"A brand is not a logo — it's a feeling you design into every touchpoint. I build systems that speak consistently and powerfully."</p><div class="ch-statement-big"><span>Lookbook — Branding</span></div></div>
+    <div class="rv d1">
+      <div class="ch-gallery-header"><span class="ch-gallery-title">The Collection</span><span class="ch-gallery-count" id="ctr-br">01 / 06</span></div>
+      <div class="ch-gal"><div class="ch-gal-track" id="gal-br">
+        <div class="gal-card s" onclick="openLB('Branding 01')"><div class="gal-card-inner"><span class="gal-num">01</span><span class="gal-cat">Branding</span></div><div class="gal-hover"><span class="gal-hover-label">Branding 01</span></div></div>
+        <div class="gal-card s" onclick="openLB('Branding 02')"><div class="gal-card-inner"><span class="gal-num">02</span><span class="gal-cat">Branding</span></div><div class="gal-hover"><span class="gal-hover-label">Branding 02</span></div></div>
+        <div class="gal-card s" onclick="openLB('Branding 03')"><div class="gal-card-inner"><span class="gal-num">03</span><span class="gal-cat">Branding</span></div><div class="gal-hover"><span class="gal-hover-label">Branding 03</span></div></div>
+        <div class="gal-card s" onclick="openLB('Branding 04')"><div class="gal-card-inner"><span class="gal-num">04</span><span class="gal-cat">Branding</span></div><div class="gal-hover"><span class="gal-hover-label">Branding 04</span></div></div>
+        <div class="gal-card s" onclick="openLB('Branding 05')"><div class="gal-card-inner"><span class="gal-num">05</span><span class="gal-cat">Branding</span></div><div class="gal-hover"><span class="gal-hover-label">Branding 05</span></div></div>
+        <div class="gal-card s" onclick="openLB('Branding 06')"><div class="gal-card-inner"><span class="gal-num">06</span><span class="gal-cat">Branding</span></div><div class="gal-hover"><span class="gal-hover-label">Branding 06</span></div></div>
+      </div></div>
+      <div class="gal-controls"><div class="gal-nav"><button class="gal-btn" onclick="gP('gal-br','ctr-br','gd-br',6)">←</button><button class="gal-btn" onclick="gN('gal-br','ctr-br','gd-br',6)">→</button></div><div class="gal-dots" id="gd-br"><div class="gal-dot on"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div></div></div>
+    </div>
+  </div>
+  <div class="ch-outro rv"><div><p class="ch-outro-quote">"Identity is not assigned — it is designed."</p><p class="ch-outro-author">— Ivan Amad</p></div><div class="ch-outro-links"><a class="outro-btn" href="https://www.artstation.com/ivanosh" target="_blank">View on ArtStation ↗</a></div></div>
+</section>
+
+<!-- ═══ CHAPTERS 04–07 (Logos, Pixel Art, Booth, Social) ═══ -->
+<section id="ch-lg" class="chapter">
+  <div class="ch-cover"><div class="ch-cover-bg"></div><span class="ch-scroll-label">Logos</span><div class="ch-cover-meta"><div class="ch-tags"><span class="ch-tag-bracket">[fourth]</span><span class="ch-tag-bracket bold">[CHAPTER]</span></div></div><div class="ch-cover-num">04</div></div>
+  <div class="ch-body">
+    <p class="ch-num-label rv">Chapter 04</p>
+    <h2 class="ch-title rv d1"><span class="ol">Logo</span><br/>Marks</h2>
+    <p class="ch-desc rv d2">Pure symbols. Distilled essence. Marks that speak without words — and endure without context.</p>
+    <div class="img-strip rv d3"><div class="strip-row"><div class="strip-inner"><div class="strip-card"><span>LG 01</span></div><div class="strip-card"><span>LG 02</span></div><div class="strip-card"><span>LG 03</span></div><div class="strip-card"><span>LG 04</span></div><div class="strip-card"><span>LG 05</span></div><div class="strip-card"><span>LG 06</span></div><div class="strip-card"><span>LG 01</span></div><div class="strip-card"><span>LG 02</span></div><div class="strip-card"><span>LG 03</span></div><div class="strip-card"><span>LG 04</span></div><div class="strip-card"><span>LG 05</span></div><div class="strip-card"><span>LG 06</span></div></div></div><div class="strip-row"><div class="strip-inner rev"><div class="strip-card"><span>LG 07</span></div><div class="strip-card"><span>LG 08</span></div><div class="strip-card"><span>LG 09</span></div><div class="strip-card"><span>LG 07</span></div><div class="strip-card"><span>LG 08</span></div><div class="strip-card"><span>LG 09</span></div></div></div></div>
+    <div class="ch-marquee rv"><div class="ch-mq-inner"><span class="ch-mq-word">LOGO-</span><span class="ch-mq-word outline">-MARKS</span><span class="ch-mq-word">LOGO-</span><span class="ch-mq-word outline">-MARKS</span><span class="ch-mq-word">LOGO-</span><span class="ch-mq-word outline">-MARKS</span><span class="ch-mq-word">LOGO-</span><span class="ch-mq-word outline">-MARKS</span></div></div>
+    <div class="ch-statement rv"><p class="ch-statement-quote">"The best logo disappears into memory — then becomes the first thing you recall. I design that moment."</p><div class="ch-statement-big"><span>Lookbook — Logos</span></div></div>
+    <div class="rv d1">
+      <div class="ch-gallery-header"><span class="ch-gallery-title">The Collection</span><span class="ch-gallery-count" id="ctr-lg">01 / 06</span></div>
+      <div class="ch-gal"><div class="ch-gal-track" id="gal-lg">
+        <div class="gal-card s" onclick="openLB('Logo 01')"><div class="gal-card-inner"><span class="gal-num">01</span><span class="gal-cat">Logo</span></div><div class="gal-hover"><span class="gal-hover-label">Logo 01</span></div></div>
+        <div class="gal-card s" onclick="openLB('Logo 02')"><div class="gal-card-inner"><span class="gal-num">02</span><span class="gal-cat">Logo</span></div><div class="gal-hover"><span class="gal-hover-label">Logo 02</span></div></div>
+        <div class="gal-card s" onclick="openLB('Logo 03')"><div class="gal-card-inner"><span class="gal-num">03</span><span class="gal-cat">Logo</span></div><div class="gal-hover"><span class="gal-hover-label">Logo 03</span></div></div>
+        <div class="gal-card s" onclick="openLB('Logo 04')"><div class="gal-card-inner"><span class="gal-num">04</span><span class="gal-cat">Logo</span></div><div class="gal-hover"><span class="gal-hover-label">Logo 04</span></div></div>
+        <div class="gal-card s" onclick="openLB('Logo 05')"><div class="gal-card-inner"><span class="gal-num">05</span><span class="gal-cat">Logo</span></div><div class="gal-hover"><span class="gal-hover-label">Logo 05</span></div></div>
+        <div class="gal-card s" onclick="openLB('Logo 06')"><div class="gal-card-inner"><span class="gal-num">06</span><span class="gal-cat">Logo</span></div><div class="gal-hover"><span class="gal-hover-label">Logo 06</span></div></div>
+      </div></div>
+      <div class="gal-controls"><div class="gal-nav"><button class="gal-btn" onclick="gP('gal-lg','ctr-lg','gd-lg',6)">←</button><button class="gal-btn" onclick="gN('gal-lg','ctr-lg','gd-lg',6)">→</button></div><div class="gal-dots" id="gd-lg"><div class="gal-dot on"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div></div></div>
+    </div>
+  </div>
+  <div class="ch-outro rv"><div><p class="ch-outro-quote">"One mark. One truth."</p><p class="ch-outro-author">— Ivan Amad</p></div><div class="ch-outro-links"><a class="outro-btn" href="https://www.artstation.com/ivanosh" target="_blank">View on ArtStation ↗</a></div></div>
+</section>
+
+<section id="ch-pa" class="chapter">
+  <div class="ch-cover"><div class="ch-cover-bg" style="background-image:linear-gradient(rgba(255,255,255,.008) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.008) 1px,transparent 1px);background-size:8px 8px;background-color:var(--g2)"></div><span class="ch-scroll-label">Pixel Art</span><div class="ch-cover-meta"><div class="ch-tags"><span class="ch-tag-bracket">[fifth]</span><span class="ch-tag-bracket bold">[CHAPTER]</span></div></div><div class="ch-cover-num">05</div></div>
+  <div class="ch-body">
+    <p class="ch-num-label rv">Chapter 05</p>
+    <h2 class="ch-title rv d1">Pixel<br/><span class="ol">Art</span></h2>
+    <p class="ch-desc rv d2">Digital worlds one pixel at a time. Retro precision meets modern soul — every dot a deliberate act.</p>
+    <div class="img-strip rv d3"><div class="strip-row"><div class="strip-inner"><div class="strip-card"><span>PA 01</span></div><div class="strip-card"><span>PA 02</span></div><div class="strip-card"><span>PA 03</span></div><div class="strip-card"><span>PA 04</span></div><div class="strip-card"><span>PA 05</span></div><div class="strip-card"><span>PA 06</span></div><div class="strip-card"><span>PA 01</span></div><div class="strip-card"><span>PA 02</span></div><div class="strip-card"><span>PA 03</span></div><div class="strip-card"><span>PA 04</span></div><div class="strip-card"><span>PA 05</span></div><div class="strip-card"><span>PA 06</span></div></div></div><div class="strip-row"><div class="strip-inner rev"><div class="strip-card"><span>PA 07</span></div><div class="strip-card"><span>PA 08</span></div><div class="strip-card"><span>PA 09</span></div><div class="strip-card"><span>PA 07</span></div><div class="strip-card"><span>PA 08</span></div><div class="strip-card"><span>PA 09</span></div></div></div></div>
+    <div class="ch-marquee rv"><div class="ch-mq-inner"><span class="ch-mq-word">PIXEL-</span><span class="ch-mq-word outline">-ART</span><span class="ch-mq-word">PIXEL-</span><span class="ch-mq-word outline">-ART</span><span class="ch-mq-word">PIXEL-</span><span class="ch-mq-word outline">-ART</span><span class="ch-mq-word">PIXEL-</span><span class="ch-mq-word outline">-ART</span></div></div>
+    <div class="ch-statement rv"><p class="ch-statement-quote">"In a world of infinite resolution, I choose the grid. Pixel art is the art of constraint — and constraint is where creativity lives."</p><div class="ch-statement-big"><span>Lookbook — Pixel Art</span></div></div>
+    <div class="rv d1">
+      <div class="ch-gallery-header"><span class="ch-gallery-title">The Collection</span><span class="ch-gallery-count" id="ctr-pa">01 / 06</span></div>
+      <div class="ch-gal"><div class="ch-gal-track" id="gal-pa">
+        <div class="gal-card s" onclick="openLB('Pixel Art 01')"><div class="gal-card-inner"><span class="gal-num">01</span><span class="gal-cat">Pixel Art</span></div><div class="gal-hover"><span class="gal-hover-label">Pixel Art 01</span></div></div>
+        <div class="gal-card s" onclick="openLB('Pixel Art 02')"><div class="gal-card-inner"><span class="gal-num">02</span><span class="gal-cat">Pixel Art</span></div><div class="gal-hover"><span class="gal-hover-label">Pixel Art 02</span></div></div>
+        <div class="gal-card s" onclick="openLB('Pixel Art 03')"><div class="gal-card-inner"><span class="gal-num">03</span><span class="gal-cat">Pixel Art</span></div><div class="gal-hover"><span class="gal-hover-label">Pixel Art 03</span></div></div>
+        <div class="gal-card s" onclick="openLB('Pixel Art 04')"><div class="gal-card-inner"><span class="gal-num">04</span><span class="gal-cat">Pixel Art</span></div><div class="gal-hover"><span class="gal-hover-label">Pixel Art 04</span></div></div>
+        <div class="gal-card s" onclick="openLB('Pixel Art 05')"><div class="gal-card-inner"><span class="gal-num">05</span><span class="gal-cat">Pixel Art</span></div><div class="gal-hover"><span class="gal-hover-label">Pixel Art 05</span></div></div>
+        <div class="gal-card s" onclick="openLB('Pixel Art 06')"><div class="gal-card-inner"><span class="gal-num">06</span><span class="gal-cat">Pixel Art</span></div><div class="gal-hover"><span class="gal-hover-label">Pixel Art 06</span></div></div>
+      </div></div>
+      <div class="gal-controls"><div class="gal-nav"><button class="gal-btn" onclick="gP('gal-pa','ctr-pa','gd-pa',6)">←</button><button class="gal-btn" onclick="gN('gal-pa','ctr-pa','gd-pa',6)">→</button></div><div class="gal-dots" id="gd-pa"><div class="gal-dot on"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div></div></div>
+    </div>
+  </div>
+  <div class="ch-outro rv"><div><p class="ch-outro-quote">"Pixel by pixel — a universe."</p><p class="ch-outro-author">— Ivan Amad</p></div><div class="ch-outro-links"><a class="outro-btn" href="https://www.artstation.com/ivanosh" target="_blank">View on ArtStation ↗</a></div></div>
+</section>
+
+<section id="ch-bd" class="chapter">
+  <div class="ch-cover"><div class="ch-cover-bg"></div><span class="ch-scroll-label">Booth Designs</span><div class="ch-cover-meta"><div class="ch-tags"><span class="ch-tag-bracket">[sixth]</span><span class="ch-tag-bracket bold">[CHAPTER]</span></div></div><div class="ch-cover-num">06</div></div>
+  <div class="ch-body">
+    <p class="ch-num-label rv">Chapter 06</p>
+    <h2 class="ch-title rv d1">Booth<br/><span class="ol">Designs</span></h2>
+    <p class="ch-desc rv d2">Spatial brand experiences — environments that speak volumes before a word is said.</p>
+    <div class="img-strip rv d3"><div class="strip-row"><div class="strip-inner"><div class="strip-card"><span>BD 01</span></div><div class="strip-card"><span>BD 02</span></div><div class="strip-card"><span>BD 03</span></div><div class="strip-card"><span>BD 04</span></div><div class="strip-card"><span>BD 05</span></div><div class="strip-card"><span>BD 01</span></div><div class="strip-card"><span>BD 02</span></div><div class="strip-card"><span>BD 03</span></div><div class="strip-card"><span>BD 04</span></div><div class="strip-card"><span>BD 05</span></div></div></div><div class="strip-row"><div class="strip-inner rev"><div class="strip-card"><span>BD 06</span></div><div class="strip-card"><span>BD 07</span></div><div class="strip-card"><span>BD 08</span></div><div class="strip-card"><span>BD 06</span></div><div class="strip-card"><span>BD 07</span></div><div class="strip-card"><span>BD 08</span></div></div></div></div>
+    <div class="ch-marquee rv"><div class="ch-mq-inner"><span class="ch-mq-word">BOOTH-</span><span class="ch-mq-word outline">-DESIGN</span><span class="ch-mq-word">BOOTH-</span><span class="ch-mq-word outline">-DESIGN</span><span class="ch-mq-word">BOOTH-</span><span class="ch-mq-word outline">-DESIGN</span><span class="ch-mq-word">BOOTH-</span><span class="ch-mq-word outline">-DESIGN</span></div></div>
+    <div class="ch-statement rv"><p class="ch-statement-quote">"Space is a medium. I design booths that stop people mid-step — environments that pull you in and make you feel the brand."</p><div class="ch-statement-big"><span>Lookbook — Booth Designs</span></div></div>
+    <div class="rv d1">
+      <div class="ch-gallery-header"><span class="ch-gallery-title">The Collection</span><span class="ch-gallery-count" id="ctr-bd">01 / 05</span></div>
+      <div class="ch-gal"><div class="ch-gal-track" id="gal-bd">
+        <div class="gal-card w" onclick="openLB('Booth Design 01')"><div class="gal-card-inner"><span class="gal-num">01</span><span class="gal-cat">Booth Design</span></div><div class="gal-hover"><span class="gal-hover-label">Booth Design 01</span></div></div>
+        <div class="gal-card w" onclick="openLB('Booth Design 02')"><div class="gal-card-inner"><span class="gal-num">02</span><span class="gal-cat">Booth Design</span></div><div class="gal-hover"><span class="gal-hover-label">Booth Design 02</span></div></div>
+        <div class="gal-card w" onclick="openLB('Booth Design 03')"><div class="gal-card-inner"><span class="gal-num">03</span><span class="gal-cat">Booth Design</span></div><div class="gal-hover"><span class="gal-hover-label">Booth Design 03</span></div></div>
+        <div class="gal-card w" onclick="openLB('Booth Design 04')"><div class="gal-card-inner"><span class="gal-num">04</span><span class="gal-cat">Booth Design</span></div><div class="gal-hover"><span class="gal-hover-label">Booth Design 04</span></div></div>
+        <div class="gal-card w" onclick="openLB('Booth Design 05')"><div class="gal-card-inner"><span class="gal-num">05</span><span class="gal-cat">Booth Design</span></div><div class="gal-hover"><span class="gal-hover-label">Booth Design 05</span></div></div>
+      </div></div>
+      <div class="gal-controls"><div class="gal-nav"><button class="gal-btn" onclick="gP('gal-bd','ctr-bd','gd-bd',5)">←</button><button class="gal-btn" onclick="gN('gal-bd','ctr-bd','gd-bd',5)">→</button></div><div class="gal-dots" id="gd-bd"><div class="gal-dot on"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div></div></div>
+    </div>
+  </div>
+  <div class="ch-outro rv"><div><p class="ch-outro-quote">"Walk in. Feel the brand. Never forget it."</p><p class="ch-outro-author">— Ivan Amad</p></div><div class="ch-outro-links"><a class="outro-btn" href="https://www.artstation.com/ivanosh" target="_blank">View on ArtStation ↗</a></div></div>
+</section>
+
+<section id="ch-sm" class="chapter">
+  <div class="ch-cover"><div class="ch-cover-bg"></div><span class="ch-scroll-label">Social Media</span><div class="ch-cover-meta"><div class="ch-tags"><span class="ch-tag-bracket">[seventh]</span><span class="ch-tag-bracket bold">[CHAPTER]</span></div></div><div class="ch-cover-num">07</div></div>
+  <div class="ch-body">
+    <p class="ch-num-label rv">Chapter 07</p>
+    <h2 class="ch-title rv d1">Social<br/><span class="ol">Media</span></h2>
+    <p class="ch-desc rv d2">Scroll-stopping visuals designed for the digital feed — each post an artwork that demands attention.</p>
+    <div class="img-strip rv d3"><div class="strip-row"><div class="strip-inner"><div class="strip-card"><span>SM 01</span></div><div class="strip-card"><span>SM 02</span></div><div class="strip-card"><span>SM 03</span></div><div class="strip-card"><span>SM 04</span></div><div class="strip-card"><span>SM 05</span></div><div class="strip-card"><span>SM 06</span></div><div class="strip-card"><span>SM 01</span></div><div class="strip-card"><span>SM 02</span></div><div class="strip-card"><span>SM 03</span></div><div class="strip-card"><span>SM 04</span></div><div class="strip-card"><span>SM 05</span></div><div class="strip-card"><span>SM 06</span></div></div></div><div class="strip-row"><div class="strip-inner rev"><div class="strip-card"><span>SM 07</span></div><div class="strip-card"><span>SM 08</span></div><div class="strip-card"><span>SM 09</span></div><div class="strip-card"><span>SM 07</span></div><div class="strip-card"><span>SM 08</span></div><div class="strip-card"><span>SM 09</span></div></div></div></div>
+    <div class="ch-marquee rv"><div class="ch-mq-inner"><span class="ch-mq-word">SOCIAL-</span><span class="ch-mq-word outline">-MEDIA</span><span class="ch-mq-word">SOCIAL-</span><span class="ch-mq-word outline">-MEDIA</span><span class="ch-mq-word">SOCIAL-</span><span class="ch-mq-word outline">-MEDIA</span><span class="ch-mq-word">SOCIAL-</span><span class="ch-mq-word outline">-MEDIA</span></div></div>
+    <div class="ch-statement rv"><p class="ch-statement-quote">"The feed moves fast. My designs make it stop. I craft visuals that live in the scroll and stay in the mind."</p><div class="ch-statement-big"><span>Lookbook — Social Media</span></div></div>
+    <div class="rv d1">
+      <div class="ch-gallery-header"><span class="ch-gallery-title">The Collection</span><span class="ch-gallery-count" id="ctr-sm">01 / 08</span></div>
+      <div class="ch-gal"><div class="ch-gal-track" id="gal-sm">
+        <div class="gal-card p" onclick="openLB('Social Media 01')"><div class="gal-card-inner"><span class="gal-num">01</span><span class="gal-cat">Social</span></div><div class="gal-hover"><span class="gal-hover-label">Social Media 01</span></div></div>
+        <div class="gal-card p" onclick="openLB('Social Media 02')"><div class="gal-card-inner"><span class="gal-num">02</span><span class="gal-cat">Social</span></div><div class="gal-hover"><span class="gal-hover-label">Social Media 02</span></div></div>
+        <div class="gal-card p" onclick="openLB('Social Media 03')"><div class="gal-card-inner"><span class="gal-num">03</span><span class="gal-cat">Social</span></div><div class="gal-hover"><span class="gal-hover-label">Social Media 03</span></div></div>
+        <div class="gal-card p" onclick="openLB('Social Media 04')"><div class="gal-card-inner"><span class="gal-num">04</span><span class="gal-cat">Social</span></div><div class="gal-hover"><span class="gal-hover-label">Social Media 04</span></div></div>
+        <div class="gal-card p" onclick="openLB('Social Media 05')"><div class="gal-card-inner"><span class="gal-num">05</span><span class="gal-cat">Social</span></div><div class="gal-hover"><span class="gal-hover-label">Social Media 05</span></div></div>
+        <div class="gal-card p" onclick="openLB('Social Media 06')"><div class="gal-card-inner"><span class="gal-num">06</span><span class="gal-cat">Social</span></div><div class="gal-hover"><span class="gal-hover-label">Social Media 06</span></div></div>
+        <div class="gal-card p" onclick="openLB('Social Media 07')"><div class="gal-card-inner"><span class="gal-num">07</span><span class="gal-cat">Social</span></div><div class="gal-hover"><span class="gal-hover-label">Social Media 07</span></div></div>
+        <div class="gal-card p" onclick="openLB('Social Media 08')"><div class="gal-card-inner"><span class="gal-num">08</span><span class="gal-cat">Social</span></div><div class="gal-hover"><span class="gal-hover-label">Social Media 08</span></div></div>
+      </div></div>
+      <div class="gal-controls"><div class="gal-nav"><button class="gal-btn" onclick="gP('gal-sm','ctr-sm','gd-sm',8)">←</button><button class="gal-btn" onclick="gN('gal-sm','ctr-sm','gd-sm',8)">→</button></div><div class="gal-dots" id="gd-sm"><div class="gal-dot on"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div><div class="gal-dot"></div></div></div>
+    </div>
+  </div>
+  <div class="ch-outro rv"><div><p class="ch-outro-quote">"One post. Three seconds. Remembered forever."</p><p class="ch-outro-author">— Ivan Amad</p></div><div class="ch-outro-links"><a class="outro-btn" href="https://www.instagram.com/ivan_emad1/" target="_blank">View on Instagram ↗</a></div></div>
+</section>
+
+<!-- ═══ LINKS ═══ -->
+<section id="links-ch">
+  <p class="talk-eyebrow rv">Available for work</p>
+  <h2 class="talk-headline rv d1">Let's<br/><span>Talk.</span></h2>
+  <p class="talk-sub rv d2">Open to commissions, brand collaborations, and creative direction projects. Let's build something unforgettable together.</p>
+  <a class="talk-cta rv d3" href="mailto:ivan.amad.art@gmail.com">
+    <span>Send a message</span><span class="cta-arr">↗</span>
+  </a>
+  <div class="talk-grid rv d4">
+    <a class="talk-card" href="mailto:ivan.amad.art@gmail.com">
+      <i class="tc-icon">✉</i>
+      <span class="tc-label">Email</span>
+      <span class="tc-val">ivan.amad.art@gmail.com</span>
+      <span class="tc-arr">↗</span>
+    </a>
+    <a class="talk-card" href="tel:+9647838980406">
+      <i class="tc-icon">✆</i>
+      <span class="tc-label">Phone</span>
+      <span class="tc-val">+964 783 898 0406</span>
+      <span class="tc-arr">↗</span>
+    </a>
+    <a class="talk-card" href="https://www.artstation.com/ivanosh" target="_blank">
+      <i class="tc-icon">◈</i>
+      <span class="tc-label">ArtStation</span>
+      <span class="tc-val">@ivanosh</span>
+      <span class="tc-arr">↗</span>
+    </a>
+    <a class="talk-card" href="https://www.instagram.com/ivan_emad1/" target="_blank">
+      <i class="tc-icon">◉</i>
+      <span class="tc-label">Instagram</span>
+      <span class="tc-val">@ivan_emad1</span>
+      <span class="tc-arr">↗</span>
+    </a>
+    <a class="talk-card" href="https://www.linkedin.com/in/ivan-amad-01a969176/" target="_blank">
+      <i class="tc-icon">⬡</i>
+      <span class="tc-label">LinkedIn</span>
+      <span class="tc-val">Ivan Amad</span>
+      <span class="tc-arr">↗</span>
+    </a>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer id="footer">
+  <p class="ft-eyebrow rv">Ivan Amad — Visual Art Director</p>
+  <div class="ft-marquee rv">
+    <div class="ft-mq-inner">
+      <span class="ft-mq-word">IVAN AMAD</span><span class="ft-mq-word ol">ART DIRECTOR</span>
+      <span class="ft-mq-word">IVAN AMAD</span><span class="ft-mq-word ol">ART DIRECTOR</span>
+      <span class="ft-mq-word">IVAN AMAD</span><span class="ft-mq-word ol">ART DIRECTOR</span>
+      <span class="ft-mq-word">IVAN AMAD</span><span class="ft-mq-word ol">ART DIRECTOR</span>
+    </div>
+  </div>
+  <div class="ft-links rv">
+    <a class="ft-link" href="https://www.artstation.com/ivanosh" target="_blank">ArtStation ↗</a>
+    <a class="ft-link" href="https://www.instagram.com/ivan_emad1/" target="_blank">Instagram ↗</a>
+    <a class="ft-link" href="https://www.linkedin.com/in/ivan-amad-01a969176/" target="_blank">LinkedIn ↗</a>
+    <a class="ft-link" href="mailto:ivan.amad.art@gmail.com">ivan.amad.art@gmail.com ↗</a>
+    <a class="ft-link" href="tel:+9647838980406">+964 783 898 0406</a>
+    <a class="ft-link" href="#hero">↑ Back to top</a>
+  </div>
+  <p class="ft-copy rv">© 2026 — Ivan Amad. All rights reserved.</p>
+</footer>
+
+<script>
+/* ── GRAIN ── */
+(()=>{
+  const c=document.getElementById('grain'),x=c.getContext('2d');
+  function r(){c.width=innerWidth;c.height=innerHeight;c.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:8900;opacity:.038'}
+  function f(){const i=x.createImageData(c.width,c.height),d=new Uint32Array(i.data.buffer);for(let j=d.length;j--;){const v=Math.random()*255|0;d[j]=(255<<24)|(v<<16)|(v<<8)|v}x.putImageData(i,0,0);requestAnimationFrame(f)}
+  r();f();addEventListener('resize',r);
+})();
+
+/* ── HERO CANVAS (particle network) ── */
+(()=>{
+  const cv=document.getElementById('hero-cv'),ctx=cv.getContext('2d');
+  let W,H,mx=-999,my=-999;
+  const N=70,dots=[];
+  function Dot(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-.5)*.3;this.vy=(Math.random()-.5)*.3;this.r=Math.random()*1.4+.4;this.a=Math.random()}
+  Dot.prototype.tick=function(){
+    const dx=this.x-mx,dy=this.y-my,d=Math.hypot(dx,dy);
+    if(d<110){this.vx+=dx/d*.018;this.vy+=dy/d*.018}
+    this.vx*=.98;this.vy*=.98;this.x+=this.vx;this.y+=this.vy;
+    if(this.x<0||this.x>W)this.vx*=-1;if(this.y<0||this.y>H)this.vy*=-1;
+    this.a+=( Math.random()-.5)*.018;this.a=Math.max(.08,Math.min(.9,this.a));
+  };
+  function rs(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+  for(let i=0;i<N;i++)dots.push(new Dot());
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<dots.length;i++){for(let j=i+1;j<dots.length;j++){
+      const dx=dots[i].x-dots[j].x,dy=dots[i].y-dots[j].y,d=Math.hypot(dx,dy);
+      if(d<150){ctx.beginPath();ctx.moveTo(dots[i].x,dots[i].y);ctx.lineTo(dots[j].x,dots[j].y);ctx.strokeStyle=`rgba(255,255,255,${(1-d/150)*.1})`;ctx.lineWidth=.5;ctx.stroke()}
+    }}
+    dots.forEach(d=>{d.tick();ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${d.a*.45})`;ctx.fill()});
+    requestAnimationFrame(frame);
+  }
+  rs();frame();addEventListener('resize',rs);
+  document.getElementById('hero').addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
+  document.getElementById('hero').addEventListener('mouseleave',()=>{mx=-999;my=-999});
+})();
+
+/* ── CURSOR + PIXEL PARTICLES ── */
+const cDot=document.getElementById('cur'),cRing=document.getElementById('cur-r');
+const pxCv=document.getElementById('px-canvas'),pxCtx=pxCv.getContext('2d');
+let mx=0,my=0,rx=0,ry=0,pmx=0,pmy=0;
+const particles=[];
+
+function resizePx(){pxCv.width=innerWidth;pxCv.height=innerHeight}
+resizePx();addEventListener('resize',resizePx);
+
+function spawnPixels(x,y){
+  const n=Math.floor(Math.random()*3)+2;
+  const isLight=document.body.classList.contains('light');
+  for(let i=0;i<n;i++){
+    const sz=Math.random()*3+1.2;
+    const speed=Math.random()*1.8+0.4;
+    const angle=Math.random()*Math.PI*2;
+    const life=Math.random()*0.6+0.5;
+    const brightness=isLight?Math.floor(Math.random()*60):Math.floor(Math.random()*200+55);
+    particles.push({
+      x,y,
+      vx:Math.cos(angle)*speed*(Math.random()<.5?-1:1)*0.6,
+      vy:Math.sin(angle)*speed-1.2,
+      sz,life,maxLife:life,
+      rgb:isLight?`0,0,0`:`${brightness},${brightness},${brightness}`
+    });
+  }
+}
+
+function animPx(){
+  pxCtx.clearRect(0,0,pxCv.width,pxCv.height);
+  const dx=mx-pmx,dy=my-pmy;
+  const spd=Math.hypot(dx,dy);
+  if(spd>4){spawnPixels(mx,my);pmx=mx;pmy=my}
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx;p.y+=p.vy;
+    p.vy+=0.06;
+    p.life-=0.028;
+    if(p.life<=0){particles.splice(i,1);continue}
+    const a=p.life/p.maxLife;
+    pxCtx.fillStyle=`rgba(${p.rgb},${a*.85})`;
+    pxCtx.fillRect(Math.round(p.x-p.sz/2),Math.round(p.y-p.sz/2),Math.round(p.sz),Math.round(p.sz));
+  }
+  requestAnimationFrame(animPx);
+}
+animPx();
+
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cDot.style.left=mx+'px';cDot.style.top=my+'px'});
+(function raf(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cRing.style.left=rx+'px';cRing.style.top=ry+'px';requestAnimationFrame(raf)})();
+document.querySelectorAll('a,button,.gal-card,.link-card,.i-tag').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('ch'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('ch'));
+});
+
+/* ── THEME TOGGLE ── */
+const themeBtn=document.getElementById('theme-btn');
+themeBtn.addEventListener('click',()=>{
+  document.body.classList.toggle('light');
+  themeBtn.querySelector('.tb-icon').textContent=document.body.classList.contains('light')?'◐':'◑';
+  // update hero canvas stroke color if needed
+  particles.forEach(p=>{
+    p.rgb=document.body.classList.contains('light')?'0,0,0':'200,200,200';
+  });
+});
+
+/* ── LOADER — origami / clay stop-motion ── */
+(()=>{
+  const loader=document.getElementById('loader');
+  const stage=document.getElementById('ld-stage');
+  const barEl=document.getElementById('ld-bar');
+  const hint=document.getElementById('ld-hint');
+  const role=document.getElementById('ld-role');
+  const frameEl=document.getElementById('ld-frame');
+  const chars=[...loader.querySelectorAll('.ld-ch')];
+  document.body.classList.add('no-scroll');
+
+  /* ── animated grain (paper/clay texture) ── */
+  const gc=document.getElementById('ld-grain');
+  const gx=gc.getContext('2d');
+  function grainSize(){gc.width=innerWidth;gc.height=innerHeight;}
+  function grainFrame(){
+    const id=gx.createImageData(gc.width,gc.height);
+    const d=new Uint32Array(id.data.buffer);
+    for(let i=d.length;i--;){const v=Math.random()*200|0;d[i]=(255<<24)|(v<<16)|(v<<8)|v;}
+    gx.putImageData(id,0,0);
+    setTimeout(()=>requestAnimationFrame(grainFrame),55); // 18fps grain = stop-motion texture
+  }
+  grainSize();grainFrame();addEventListener('resize',grainSize);
+
+  /* ── frame counter ticker (like stop-motion reference marks) ── */
+  let frameN=0;
+  const frameTick=setInterval(()=>{
+    frameN++;
+    frameEl.textContent='◼ FRAME '+String(frameN).padStart(3,'0');
+  },83); // ~12fps
+
+  /* ── trigger fold-in for each letter, with shake on landing ── */
+  const LAST_DELAY=1.14, ANIM_DUR=0.72;
+  chars.forEach((ch,i)=>{
+    const del=parseFloat(ch.style.getPropertyValue('--dd'))||0;
+    // Start animation
+    ch.classList.add('drop');
+    // Camera shake when this letter lands
+    setTimeout(()=>{
+      stage.classList.add('shake');
+      stage.addEventListener('animationend',()=>stage.classList.remove('shake'),{once:true});
+    },(del+ANIM_DUR-.05)*1000);
+  });
+
+  /* ── switch to idle wobble after all letters have landed ── */
+  setTimeout(()=>{
+    chars.forEach(ch=>{
+      ch.classList.remove('drop');
+      ch.style.opacity='1';
+      ch.style.transform='perspective(900px) rotateX(0deg) translateY(0) scale(1)';
+      ch.classList.add('idle');
+    });
+    loader.classList.add('glow-on');
+  },(LAST_DELAY+ANIM_DUR+.15)*1000);
+
+  /* ── progress bar ── */
+  let n=0,done=false;
+  const iv=setInterval(()=>{
+    if(done)return;
+    const step=n<28?Math.random()*.8+.18:n<65?Math.random()*1.8+.4:n<88?Math.random()*1.1+.2:Math.random()*.3+.08;
+    n=Math.min(n+step,99);
+    barEl.style.width=n+'%';
+  },110);
+
+  function complete(){
+    done=true;clearInterval(iv);clearInterval(frameTick);
+    barEl.style.width='100%';
+    frameEl.textContent='◼ FRAME READY';
+    setTimeout(()=>{
+      role.classList.add('show');
+      hint.classList.add('show');
+    },500);
+  }
+  if(document.readyState==='complete')setTimeout(complete,900);
+  else window.addEventListener('load',()=>setTimeout(complete,700));
+
+  /* ── click anywhere to enter ── */
+  let entered=false;
+  loader.addEventListener('click',()=>{
+    if(!done||entered)return;
+    entered=true;
+    clearInterval(frameTick);
+    hint.style.opacity='0';
+    setTimeout(()=>{
+      loader.classList.add('wipe');
+      loader.addEventListener('animationend',()=>{
+        loader.style.display='none';
+        document.body.classList.remove('no-scroll');
+      },{once:true});
+    },80);
+  });
+})();
+
+/* ── PAGE WIPE TRANSITION ── */
+const wipeEl=document.getElementById('wipe');
+let wiping=false;
+function doWipe(targetId){
+  if(wiping)return;
+  wiping=true;
+  wipeEl.classList.remove('out');
+  wipeEl.classList.add('in');
+  wipeEl.addEventListener('transitionend',()=>{
+    const t=document.getElementById(targetId.replace('#',''));
+    if(t)t.scrollIntoView({behavior:'instant'});
+    requestAnimationFrame(()=>{
+      wipeEl.classList.remove('in');
+      wipeEl.classList.add('out');
+      wipeEl.addEventListener('transitionend',()=>{
+        wipeEl.classList.remove('out');
+        wiping=false;
+      },{once:true});
+    });
+  },{once:true});
+}
+
+/* ── NAV ── */
+const burger=document.getElementById('nav-burger'),ol=document.getElementById('nav-ol');
+burger.addEventListener('click',()=>{burger.classList.toggle('open');ol.classList.toggle('open')});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const href=a.getAttribute('href');
+    if(href==='#'||href==='#hero'){return;}
+    e.preventDefault();
+    if(ol.classList.contains('open')){burger.classList.remove('open');ol.classList.remove('open');}
+    doWipe(href);
+  });
+});
+
+/* ── CHAPTER COUNTER ── */
+const CHAPTERS=[
+  {id:'about',   name:'About',       n:'00'},
+  {id:'ch-ca',   name:'Concept Art', n:'01'},
+  {id:'ch-sb',   name:'Storyboards', n:'02'},
+  {id:'ch-br',   name:'Branding',    n:'03'},
+  {id:'ch-lg',   name:'Logos',       n:'04'},
+  {id:'ch-pa',   name:'Pixel Art',   n:'05'},
+  {id:'ch-bd',   name:'Booth',       n:'06'},
+  {id:'ch-sm',   name:'Social',      n:'07'},
+];
+const navChapName=document.getElementById('nav-chap-name');
+const navChapNum=document.getElementById('nav-chap-num');
+[navChapName,navChapNum].forEach(el=>{el.style.transition='opacity .28s ease';});
+let activeCh=null;
+const chapObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const data=CHAPTERS.find(c=>c.id===e.target.id);
+      if(data&&data.id!==activeCh){
+        activeCh=data.id;
+        navChapName.style.opacity='0';navChapNum.style.opacity='0';
+        setTimeout(()=>{
+          navChapName.textContent=data.name;
+          navChapNum.textContent=data.n+' / 07';
+          navChapName.style.opacity='1';navChapNum.style.opacity='1';
+        },180);
+      }
+    }
+  });
+},{threshold:.25,rootMargin:'-80px 0px 0px 0px'});
+CHAPTERS.forEach(c=>{const el=document.getElementById(c.id);if(el)chapObs.observe(el);});
+
+/* ── DYNAMIC GALLERY LOADING (backend integration) ── */
+(async()=>{
+  const CAT_MAP={
+    'ch-ca':'concept-art',
+    'ch-sb':'storyboards',
+    'ch-br':'branding',
+    'ch-lg':'logos',
+    'ch-pa':'pixel-art',
+    'ch-bd':'booth',
+    'ch-sm':'social',
+  };
+  let data;
+  try{
+    const r=await fetch('/api/gallery');
+    if(!r.ok)return;
+    data=await r.json();
+  }catch(e){ return; }
+
+  function injectImg(container,src,label){
+    if(!container||!src)return;
+    const old=container.querySelector('img.dyn-img');
+    if(old)old.remove();
+    const img=document.createElement('img');
+    img.src=src;img.alt=label||'';img.className='dyn-img';
+    img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:block;';
+    container.insertBefore(img,container.firstChild);
+  }
+
+  Object.entries(CAT_MAP).forEach(([secId,catKey])=>{
+    const sec=document.getElementById(secId);
+    if(!sec)return;
+    const cat=data[catKey];
+    if(!cat)return;
+
+    if(cat.cover){
+      const bg=sec.querySelector('.ch-cover-bg');
+      if(bg){
+        bg.style.backgroundImage='none';
+        injectImg(bg,cat.cover,'Cover');
+        const img=bg.querySelector('img.dyn-img');
+        if(img)img.style.zIndex='-1';
+      }
+    }
+
+    if(cat.gallery&&cat.gallery.length){
+      const cards=sec.querySelectorAll('.gal-card');
+      cards.forEach((card,i)=>{
+        const item=cat.gallery[i];
+        if(!item)return;
+        const inner=card.querySelector('.gal-card-inner');
+        if(!inner)return;
+        const img=document.createElement('img');
+        img.src=item.src;img.alt=item.label;img.className='dyn-img';
+        img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:block;';
+        inner.insertBefore(img,inner.firstChild);
+        card.setAttribute('onclick',"openLB('"+item.label.replace(/'/g,"\'")+"')");
+        const hl=card.querySelector('.gal-hover-label');
+        if(hl)hl.textContent=item.label;
+      });
+    }
+
+    if(cat.strips&&cat.strips.length){
+      const stripCards=sec.querySelectorAll('.strip-card');
+      stripCards.forEach((card,i)=>{
+        const src=cat.strips[i%cat.strips.length];
+        const sp=card.querySelector('span');
+        if(sp)sp.remove();
+        const old=card.querySelector('img.dyn-img');
+        if(old)old.remove();
+        const img=document.createElement('img');
+        img.src=src;img.className='dyn-img';
+        img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
+        card.style.position='relative';
+        card.appendChild(img);
+      });
+    }
+
+    if(cat.mosaic){
+      const mosaicImgs=sec.querySelectorAll('.mosaic-img');
+      mosaicImgs.forEach((el,i)=>{
+        const src=cat.mosaic[i];
+        if(!src)return;
+        const sp=el.querySelector('span');
+        if(sp)sp.style.display='none';
+        injectImg(el,src);
+      });
+    }
+  });
+})();
+
+</script>
+</body>
+</html>

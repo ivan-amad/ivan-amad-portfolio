@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ivan Amad — Visual Art Director</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,100;1,300;1,700&display=swap" rel="stylesheet" />
+
+  <style>
+  /* ─────────────────────────────────────────────────────────────────
+     ROOT & RESET
+  ───────────────────────────────────────────────────────────────── */
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --black : #000000;
+    --white : #ffffff;
+    --g100  : #111111;
+    --g200  : #1a1a1a;
+    --g300  : #2a2a2a;
+    --g400  : #555555;
+    --g500  : #888888;
+    --g600  : #bbbbbb;
+    --g700  : #e0e0e0;
+    --ease  : cubic-bezier(.25,.46,.45,.94);
+    --ease-out: cubic-bezier(0,.55,.45,1);
+    --ease-bounce: cubic-bezier(.34,1.56,.64,1);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+  ::selection { background: var(--white); color: var(--black); }
+  a { text-decoration: none; color: inherit; cursor: none; }
+  button { cursor: none; border: none; background: none; font-family: inherit; }
+
+  /* ─────────────────────────────────────────────────────────────────
+     CUSTOM CURSOR
+  ───────────────────────────────────────────────────────────────── */
+  #c-dot {
+    position: fixed; top:0; left:0; z-index:9999;
+    width:8px; height:8px; border-radius:0;
+    background: var(--white);
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+    transition: width .2s var(--ease), height .2s var(--ease), opacity .2s;
+    mix-blend-mode: difference;
+  }
+  #c-ring {
+    position: fixed; top:0; left:0; z-index:9998;
+    width:44px; height:44px; border-radius:50%;
+    border: 1.5px solid rgba(255,255,255,.5);
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+    transition: width .35s var(--ease), height .35s var(--ease), border-color .3s, border-radius .3s;
+  }
+  #c-label {
+    position: fixed; top:0; left:0; z-index:9998;
+    pointer-events: none;
+    font-size: 9px; font-weight:600; letter-spacing:.12em;
+    text-transform: uppercase; color: var(--white);
+    opacity: 0; transition: opacity .25s;
+    transform: translate(-50%,-50%);
+  }
+  body.c-hover #c-dot   { width:4px; height:4px; opacity:.6; }
+  body.c-hover #c-ring  { width:72px; height:72px; border-color:rgba(255,255,255,.8); }
+  body.c-hover #c-label { opacity:1; }
+  body.c-drag  #c-ring  { width:56px; height:56px; border-radius:4px; }
+
+  /* cursor trail dots */
+  .c-trail {
+    position: fixed; z-index:9997;
+    width:4px; height:4px; border-radius:50%;
+    background: rgba(255,255,255,.25);
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     GRAIN OVERLAY
+  ───────────────────────────────────────────────────────────────── */
+  #grain {
+    position: fixed; inset:0;
+    pointer-events: none; z-index:8000;
+    opacity: .035;
+    width:100%; height:100%;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     NAVIGATION
+  ───────────────────────────────────────────────────────────────── */
+  #nav {
+    position: fixed; top:0; left:0; right:0; z-index:7000;
+    display: flex; align-items:center; justify-content:space-between;
+    padding: 28px clamp(24px,6vw,80px);
+    mix-blend-mode: difference;
+  }
+  #nav-logo {
+    font-size: 13px; font-weight:700; letter-spacing:.18em;
+    text-transform: uppercase; color: var(--white);
+  }
+  #nav-burger {
+    display: flex; flex-direction:column; gap:6px;
+    align-items:flex-end; padding:4px;
+    position: relative; z-index:7100;
+  }
+  .burger-line {
+    display:block; height:1.5px; background:var(--white);
+    transform-origin: right;
+    transition: width .4s var(--ease), transform .4s var(--ease), opacity .3s;
+  }
+  .burger-line:nth-child(1) { width:28px; }
+  .burger-line:nth-child(2) { width:20px; }
+  .burger-line:nth-child(3) { width:28px; }
+  #nav-burger.open .burger-line:nth-child(1) { width:28px; transform: rotate(-45deg) translateY(5px); }
+  #nav-burger.open .burger-line:nth-child(2) { opacity:0; width:0; }
+  #nav-burger.open .burger-line:nth-child(3) { width:28px; transform: rotate(45deg) translateY(-5px); }
+
+  #nav-menu {
+    position: fixed; inset:0; z-index:6900;
+    background: var(--white); color: var(--black);
+    display: flex; align-items:center; padding-left: clamp(40px,10vw,160px);
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path .75s cubic-bezier(.77,0,.18,1);
+    pointer-events: none;
+  }
+  #nav-menu.open {
+    clip-path: inset(0 0 0% 0);
+    pointer-events: all;
+  }
+  .menu-list { list-style:none; }
+  .menu-item {
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .menu-link {
+    display: flex; align-items:baseline; gap:20px;
+    font-size: clamp(32px,5.5vw,72px);
+    font-weight: 800; letter-spacing:-.03em;
+    color: var(--black); line-height:1.1;
+    transform: translateY(110%);
+    display: inline-flex;
+    transition: transform .65s var(--ease), color .25s;
+  }
+  .menu-link:hover { color: var(--g400); }
+  #nav-menu.open .menu-link {
+    transform: translateY(0);
+  }
+  #nav-menu.open .menu-item:nth-child(1) .menu-link { transition-delay:.05s; }
+  #nav-menu.open .menu-item:nth-child(2) .menu-link { transition-delay:.10s; }
+  #nav-menu.open .menu-item:nth-child(3) .menu-link { transition-delay:.15s; }
+  #nav-menu.open .menu-item:nth-child(4) .menu-link { transition-delay:.20s; }
+  #nav-menu.open .menu-item:nth-child(5) .menu-link { transition-delay:.24s; }
+  #nav-menu.open .menu-item:nth-child(6) .menu-link { transition-delay:.28s; }
+  #nav-menu.open .menu-item:nth-child(7) .menu-link { transition-delay:.31s; }
+  #nav-menu.open .menu-item:nth-child(8) .menu-link { transition-delay:.34s; }
+  #nav-menu.open .menu-item:nth-child(9) .menu-link { transition-delay:.37s; }
+  .menu-num {
+    font-size: 11px; font-weight:300; letter-spacing:.15em;
+    color: var(--g400); min-width:28px;
+    transform: none;
+  }
+  .menu-side {
+    position:absolute; right:80px; bottom:60px;
+    font-size:11px; font-weight:300; letter-spacing:.25em;
+    text-transform:uppercase; color:var(--g400);
+    display:flex; flex-direction:column; gap:8px;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     HERO
+  ───────────────────────────────────────────────────────────────── */
+  #hero {
+    position: relative; height:100vh; min-height:600px;
+    display: flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    overflow: hidden;
+  }
+  #hero-canvas {
+    position:absolute; inset:0; z-index:0;
+    width:100%; height:100%;
+  }
+  .hero-content {
+    position:relative; z-index:1;
+    text-align:center; pointer-events:none;
+  }
+  .hero-pre {
+    font-size:11px; font-weight:600; letter-spacing:.45em;
+    text-transform:uppercase; color:var(--g500);
+    margin-bottom:28px;
+    opacity:0; transform:translateY(16px);
+    animation: fadeUp .8s var(--ease) .6s forwards;
+  }
+  .hero-name {
+    font-size: clamp(68px,13vw,190px);
+    font-weight:900; letter-spacing:-.04em;
+    line-height:.88; color:var(--white);
+    overflow:hidden;
+  }
+  .hero-name-line {
+    display:block; overflow:hidden;
+  }
+  .hero-name-line span {
+    display:block;
+    opacity:0; transform:translateY(105%);
+    animation: slideUp .9s var(--ease) forwards;
+  }
+  .hero-name-line:nth-child(1) span { animation-delay:.25s; }
+  .hero-name-line:nth-child(2) span {
+    animation-delay:.38s;
+    -webkit-text-stroke:1.5px var(--white);
+    color:transparent;
+  }
+  .hero-sub {
+    font-size:12px; font-weight:300; letter-spacing:.35em;
+    text-transform:uppercase; color:var(--g500);
+    margin-top:32px;
+    opacity:0; transform:translateY(16px);
+    animation: fadeUp .8s var(--ease) .9s forwards;
+  }
+
+  /* scroll cue */
+  .scroll-cue {
+    position:absolute; bottom:40px; left:50%;
+    transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    opacity:0; animation: fadeUp .6s var(--ease) 1.4s forwards;
+  }
+  .scroll-line {
+    width:1px; height:60px; background:var(--g400);
+    position:relative; overflow:hidden;
+  }
+  .scroll-line::after {
+    content:''; position:absolute; top:-100%; left:0;
+    width:100%; height:100%;
+    background: linear-gradient(to bottom, transparent, var(--white), transparent);
+    animation: scrollLineAnim 1.8s ease-in-out 2s infinite;
+  }
+  @keyframes scrollLineAnim {
+    0%   { top:-100%; }
+    100% { top:200%; }
+  }
+  .scroll-text {
+    font-size:9px; font-weight:600; letter-spacing:.35em;
+    text-transform:uppercase; color:var(--g400);
+  }
+  /* pixel arrow */
+  .px-arrow {
+    display:flex; flex-direction:column; align-items:center; gap:0;
+    animation: bounceY 2s ease-in-out infinite;
+  }
+  @keyframes bounceY {
+    0%,100% { transform:translateY(0); }
+    50%      { transform:translateY(6px); }
+  }
+  .px-row { display:flex; }
+  .px-cell {
+    width:4px; height:4px;
+    image-rendering:pixelated;
+  }
+  .px-cell.on  { background:var(--g600); }
+  .px-cell.off { background:transparent; }
+
+  /* ─────────────────────────────────────────────────────────────────
+     MARQUEE STRIP
+  ───────────────────────────────────────────────────────────────── */
+  .marquee-strip {
+    border-top:1px solid var(--g300);
+    border-bottom:1px solid var(--g300);
+    overflow:hidden; white-space:nowrap;
+    padding:14px 0;
+    background: var(--black);
+  }
+  .marquee-inner {
+    display:inline-flex; gap:0;
+    animation: marquee 28s linear infinite;
+  }
+  .marquee-inner.rev { animation-direction:reverse; }
+  @keyframes marquee {
+    from { transform:translateX(0); }
+    to   { transform:translateX(-50%); }
+  }
+  .marquee-item {
+    font-size:11px; font-weight:600; letter-spacing:.3em;
+    text-transform:uppercase; color:var(--g400);
+    padding:0 36px;
+  }
+  .marquee-dot {
+    color:var(--g300); font-size:18px; line-height:1;
+    vertical-align:middle;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     CHAPTER SECTIONS (shared)
+  ───────────────────────────────────────────────────────────────── */
+  .chapter {
+    position:relative;
+    padding: clamp(80px,10vh,140px) clamp(24px,7vw,100px);
+    border-bottom:1px solid var(--g200);
+    overflow:hidden;
+  }
+  .ch-num {
+    position:absolute; top:clamp(40px,6vw,80px); right:clamp(24px,6vw,80px);
+    font-size:clamp(100px,20vw,280px);
+    font-weight:900; letter-spacing:-.06em;
+    color:rgba(255,255,255,.025);
+    line-height:1; user-select:none; pointer-events:none;
+    transition: color 1s;
+  }
+  .chapter:hover .ch-num { color:rgba(255,255,255,.045); }
+
+  .ch-label {
+    font-size:10px; font-weight:600; letter-spacing:.45em;
+    text-transform:uppercase; color:var(--g400);
+    display:flex; align-items:center; gap:14px;
+    margin-bottom:32px;
+  }
+  .ch-label::before {
+    content:''; width:32px; height:1px; background:var(--g300);
+  }
+  .ch-title {
+    font-size:clamp(44px,8vw,110px);
+    font-weight:900; letter-spacing:-.04em;
+    line-height:.9; margin-bottom:28px;
+  }
+  .ch-title .outline {
+    -webkit-text-stroke:1px var(--white);
+    color:transparent;
+  }
+  .ch-desc {
+    font-size:clamp(13px,1.3vw,16px);
+    font-weight:300; color:var(--g500);
+    max-width:420px; line-height:1.7;
+    margin-bottom:56px;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     ABOUT CHAPTER
+  ───────────────────────────────────────────────────────────────── */
+  #about {
+    background: var(--black);
+    display:grid; grid-template-columns:1fr 1fr; gap:80px;
+    align-items:center;
+  }
+  #about .left {}
+  #about .right {}
+  .about-body {
+    font-size:clamp(14px,1.4vw,17px);
+    font-weight:300; color:var(--g600); line-height:1.8;
+    margin-bottom:40px;
+  }
+  .about-divider { width:40px; height:1px; background:var(--g300); margin:28px 0; }
+  .tags { display:flex; flex-wrap:wrap; gap:8px; }
+  .tag {
+    font-size:9px; font-weight:600; letter-spacing:.2em;
+    text-transform:uppercase;
+    border:1px solid var(--g300); padding:7px 14px; color:var(--g400);
+    transition: border-color .3s, color .3s;
+  }
+  .tag:hover { border-color:var(--white); color:var(--white); }
+
+  /* ─────────────────────────────────────────────────────────────────
+     LINKS CHAPTER
+  ───────────────────────────────────────────────────────────────── */
+  #links .links-row {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:2px; margin-top:60px;
+  }
+  .link-card {
+    position:relative; overflow:hidden;
+    padding:48px 36px 44px;
+    background:var(--g100);
+    display:block; color:var(--white);
+    transition: transform .4s var(--ease-bounce);
+  }
+  .link-card::after {
+    content:''; position:absolute; inset:0;
+    background:var(--white);
+    transform:scaleY(0); transform-origin:bottom;
+    transition:transform .55s var(--ease);
+    z-index:0;
+  }
+  .link-card:hover::after    { transform:scaleY(1); }
+  .link-card:hover .lc-num,
+  .link-card:hover .lc-name,
+  .link-card:hover .lc-arr   { color:var(--black); }
+  .lc-num, .lc-name, .lc-arr { position:relative; z-index:1; transition:color .4s; }
+  .lc-num  { font-size:10px; font-weight:600; letter-spacing:.3em; color:var(--g400); }
+  .lc-name { font-size:clamp(24px,3vw,44px); font-weight:800; margin:14px 0 10px; letter-spacing:-.02em; }
+  .lc-arr  { font-size:22px; color:var(--g400); }
+
+  /* ─────────────────────────────────────────────────────────────────
+     GALLERY / SLIDER
+  ───────────────────────────────────────────────────────────────── */
+  .gallery-wrap { position:relative; }
+  .gallery {
+    display:flex; gap:20px;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width:none;
+    padding-bottom:4px;
+  }
+  .gallery::-webkit-scrollbar { display:none; }
+  .gallery-track {
+    display:flex; gap:20px;
+    transition: transform .75s var(--ease);
+    will-change:transform;
+    cursor: none;
+  }
+
+  /* Card base */
+  .g-card {
+    flex:0 0 auto; position:relative; overflow:hidden;
+    background:var(--g200);
+  }
+  .g-card::before {
+    content:''; position:absolute; inset:0;
+    background:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:28px 28px;
+    z-index:0;
+  }
+  .g-card-inner {
+    position:relative; z-index:1;
+    width:100%; height:100%;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:10px;
+    transition: background .4s;
+  }
+  .g-card:hover .g-card-inner { background:rgba(255,255,255,.04); }
+  .g-card-num {
+    font-size:clamp(48px,6vw,80px); font-weight:900;
+    color:rgba(255,255,255,.06); line-height:1; letter-spacing:-.04em;
+  }
+  .g-card-cat {
+    font-size:9px; font-weight:600; letter-spacing:.3em;
+    text-transform:uppercase; color:var(--g400);
+  }
+  .g-card-hover {
+    position:absolute; inset:0; z-index:2;
+    background:rgba(0,0,0,.7);
+    display:flex; align-items:flex-end; padding:18px 20px;
+    opacity:0; transition:opacity .4s var(--ease);
+  }
+  .g-card:hover .g-card-hover { opacity:1; }
+  .g-card-hover-label {
+    font-size:10px; font-weight:600; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--white);
+  }
+
+  /* CARD SIZE VARIANTS */
+  .g-card.wide  { width:clamp(280px,38vw,540px);   height:clamp(190px,26vw,370px); }
+  .g-card.tall  { width:clamp(160px,18vw,240px);   height:clamp(260px,36vw,500px); }
+  .g-card.sq    { width:clamp(220px,26vw,360px);   height:clamp(220px,26vw,360px); }
+  .g-card.sq-sm { width:clamp(180px,20vw,280px);   height:clamp(180px,20vw,280px); }
+  .g-card.pano  { width:clamp(360px,52vw,720px);   height:clamp(200px,22vw,320px); }
+  .g-card.port  { width:clamp(150px,14vw,200px);   height:clamp(260px,25vw,355px); }
+
+  /* pixel art card variant */
+  .g-card.px-card::before {
+    background-image:
+      linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
+    background-size:8px 8px;
+  }
+
+  /* GALLERY CONTROLS */
+  .gallery-controls {
+    display:flex; align-items:center;
+    justify-content:space-between;
+    margin-top:24px; padding-top:20px;
+    border-top:1px solid var(--g200);
+  }
+  .g-nav { display:flex; gap:10px; }
+  .g-btn {
+    width:44px; height:44px;
+    border:1px solid var(--g300);
+    display:flex; align-items:center; justify-content:center;
+    transition:background .3s, border-color .3s;
+    color:var(--white);
+    font-size:14px; font-weight:700;
+  }
+  .g-btn:hover { background:var(--white); border-color:var(--white); color:var(--black); }
+  .g-counter {
+    font-size:11px; font-weight:300; letter-spacing:.2em;
+    color:var(--g400);
+  }
+  .g-dots { display:flex; gap:5px; align-items:center; }
+  .g-dot {
+    width:4px; height:4px; background:var(--g300);
+    transition:background .3s, width .3s;
+  }
+  .g-dot.on { background:var(--white); width:14px; }
+
+  /* ─────────────────────────────────────────────────────────────────
+     PIXEL ART STRIP
+  ───────────────────────────────────────────────────────────────── */
+  .px-strip {
+    font-family:'Courier New',monospace;
+    font-size:9px; letter-spacing:.25em;
+    color:rgba(255,255,255,.07);
+    padding:10px 0;
+    overflow:hidden; white-space:nowrap;
+    border-top:1px solid var(--g200);
+    border-bottom:1px solid var(--g200);
+    margin-bottom:50px;
+  }
+  .px-strip-inner {
+    display:inline-block;
+    animation:marquee 24s linear infinite;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     FOOTER
+  ───────────────────────────────────────────────────────────────── */
+  #footer {
+    text-align:center;
+    padding:100px clamp(24px,6vw,80px) 64px;
+    border-top:1px solid var(--g200);
+  }
+  .footer-title {
+    font-size:clamp(36px,6vw,90px);
+    font-weight:900; letter-spacing:-.04em;
+    line-height:.95; margin-bottom:28px;
+  }
+  .footer-title .outline {
+    -webkit-text-stroke:1px var(--white);
+    color:transparent;
+  }
+  .footer-sub {
+    font-size:11px; font-weight:300; letter-spacing:.35em;
+    text-transform:uppercase; color:var(--g400);
+    margin-bottom:64px;
+  }
+  .footer-copy {
+    font-size:10px; font-weight:300; letter-spacing:.2em;
+    color:var(--g300); text-transform:uppercase;
+  }
+  .back-top {
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:10px; font-weight:600; letter-spacing:.25em;
+    text-transform:uppercase; color:var(--g400);
+    margin-top:40px; transition:color .3s;
+  }
+  .back-top:hover { color:var(--white); }
+
+  /* ─────────────────────────────────────────────────────────────────
+     LIGHTBOX — FULL SCALE
+  ───────────────────────────────────────────────────────────────── */
+  #lightbox {
+    position:fixed; inset:0; z-index:8500;
+    background:rgba(0,0,0,0);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .5s var(--ease), background .5s;
+  }
+  #lightbox.open {
+    opacity:1; pointer-events:all;
+    background:rgba(0,0,0,.96);
+  }
+
+  /* top bar */
+  .lb-bar {
+    position:absolute; top:0; left:0; right:0;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:24px clamp(20px,5vw,60px);
+    border-bottom:1px solid var(--g200);
+    z-index:2;
+  }
+  .lb-bar-left { display:flex; flex-direction:column; gap:4px; }
+  .lb-cat-label {
+    font-size:9px; font-weight:600; letter-spacing:.4em;
+    text-transform:uppercase; color:var(--g400);
+  }
+  #lb-title {
+    font-size:14px; font-weight:700; letter-spacing:-.01em;
+    color:var(--white);
+  }
+  #lb-counter {
+    font-size:11px; font-weight:300; letter-spacing:.2em; color:var(--g400);
+  }
+  #lb-close {
+    font-size:10px; font-weight:600; letter-spacing:.3em;
+    text-transform:uppercase; color:var(--g400);
+    background:none; border:none;
+    display:flex; align-items:center; gap:8px;
+    transition:color .3s;
+  }
+  #lb-close::before {
+    content:''; display:block;
+    width:20px; height:1px; background:currentColor;
+    transition:width .3s;
+  }
+  #lb-close:hover { color:var(--white); }
+  #lb-close:hover::before { width:32px; }
+
+  /* content stage */
+  .lb-stage {
+    position:relative;
+    width:100vw; height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .lb-content-wrap {
+    position:relative; z-index:1;
+    display:flex; align-items:center; justify-content:center;
+    max-width:90vw; max-height:80vh;
+    transform:scale(.88); opacity:0;
+    transition:transform .55s var(--ease-bounce), opacity .4s var(--ease);
+  }
+  #lightbox.open .lb-content-wrap {
+    transform:scale(1); opacity:1;
+  }
+
+  /* placeholder shown when no real image */
+  .lb-placeholder {
+    background:var(--g100);
+    width:clamp(320px,72vw,900px);
+    height:clamp(220px,62vh,640px);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:16px; position:relative; overflow:hidden;
+  }
+  .lb-placeholder::before {
+    content:''; position:absolute; inset:0;
+    background:
+      linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+    background-size:40px 40px;
+  }
+  .lb-p-num {
+    font-size:clamp(80px,14vw,180px); font-weight:900;
+    color:rgba(255,255,255,.04); line-height:1; letter-spacing:-.06em;
+    position:relative; z-index:1;
+  }
+  .lb-p-label {
+    font-size:clamp(16px,2vw,26px); font-weight:700;
+    color:rgba(255,255,255,.5); letter-spacing:-.01em;
+    position:relative; z-index:1;
+  }
+  .lb-p-sub {
+    font-size:10px; font-weight:300; letter-spacing:.3em;
+    text-transform:uppercase; color:var(--g300);
+    position:relative; z-index:1;
+  }
+  /* zoom: when image is real, add cursor zoom */
+  .lb-content-wrap img {
+    max-width:90vw; max-height:78vh;
+    object-fit:contain; display:block;
+    cursor:zoom-in;
+    transition:transform .4s var(--ease);
+  }
+  .lb-content-wrap.zoomed img { transform:scale(1.8); cursor:zoom-out; }
+
+  /* prev / next arrows */
+  .lb-arrow {
+    position:absolute; top:50%; z-index:2;
+    transform:translateY(-50%);
+    width:52px; height:52px;
+    border:1px solid var(--g300);
+    background:rgba(0,0,0,.5);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--white); font-size:16px; font-weight:700;
+    transition:background .3s, border-color .3s, transform .3s;
+    backdrop-filter:blur(4px);
+  }
+  .lb-arrow:hover {
+    background:var(--white); border-color:var(--white); color:var(--black);
+  }
+  #lb-prev { left:clamp(12px,3vw,40px); }
+  #lb-next { right:clamp(12px,3vw,40px); }
+  #lb-prev:hover { transform:translateY(-50%) translateX(-3px); }
+  #lb-next:hover { transform:translateY(-50%) translateX(3px); }
+
+  /* slide transition between images */
+  .lb-content-wrap.sliding-out {
+    transform:scale(.92) translateX(-30px); opacity:0;
+    transition:transform .25s var(--ease), opacity .2s;
+  }
+  .lb-content-wrap.sliding-in {
+    transform:scale(.92) translateX(30px); opacity:0;
+  }
+
+  /* dot strip at bottom */
+  .lb-dots {
+    position:absolute; bottom:28px; left:50%;
+    transform:translateX(-50%);
+    display:flex; gap:6px; z-index:2;
+  }
+  .lb-dot {
+    width:4px; height:4px; background:var(--g300);
+    transition:background .3s, width .3s;
+  }
+  .lb-dot.on { background:var(--white); width:16px; }
+
+  /* ─────────────────────────────────────────────────────────────────
+     BACKGROUND CANVAS (global floating shapes)
+  ───────────────────────────────────────────────────────────────── */
+  #bg-canvas {
+    position:fixed; inset:0; z-index:0;
+    pointer-events:none;
+    width:100%; height:100%;
+    opacity:1;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     SCROLL REVEAL
+  ───────────────────────────────────────────────────────────────── */
+  .reveal {
+    opacity:0; transform:translateY(36px);
+    transition:opacity .9s var(--ease), transform .9s var(--ease);
+  }
+  .reveal.in { opacity:1; transform:translateY(0); }
+  .reveal-d1 { transition-delay:.1s; }
+  .reveal-d2 { transition-delay:.2s; }
+  .reveal-d3 { transition-delay:.32s; }
+  .reveal-d4 { transition-delay:.44s; }
+
+  /* ─────────────────────────────────────────────────────────────────
+     KEYFRAMES
+  ───────────────────────────────────────────────────────────────── */
+  @keyframes fadeUp {
+    to { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideUp {
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     RESPONSIVE
+  ───────────────────────────────────────────────────────────────── */
+  @media (max-width:900px) {
+    #about { grid-template-columns:1fr; gap:48px; }
+    #links .links-row { grid-template-columns:1fr; gap:2px; }
+  }
+  @media (max-width:600px) {
+    body { cursor:auto; }
+    #c-dot, #c-ring, #c-label { display:none; }
+    .ch-title { font-size:clamp(36px,10vw,60px); }
+  }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BACKGROUND ANIMATION CANVAS (floating geometric shapes)
+═══════════════════════════════════════════════════════════════ -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     GRAIN
+═══════════════════════════════════════════════════════════════ -->
+<canvas id="grain"></canvas>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CURSOR
+═══════════════════════════════════════════════════════════════ -->
+<div id="c-dot"></div>
+<div id="c-ring"></div>
+<div id="c-label">VIEW</div>
+<!-- Trail dots injected by JS -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LIGHTBOX — FULL SCALE VIEWER
+     ─────────────────────────────────────────────────────────────
+     When you add real images to each .g-card (as <img> tags),
+     the lightbox will automatically show them at full scale.
+     Until then it shows an elegant placeholder.
+═══════════════════════════════════════════════════════════════ -->
+<div id="lightbox">
+  <!-- top bar -->
+  <div class="lb-bar">
+    <div class="lb-bar-left">
+      <span class="lb-cat-label" id="lb-cat">Category</span>
+      <span id="lb-title">Work Title</span>
+    </div>
+    <span id="lb-counter">01 / 06</span>
+    <button id="lb-close">✕ &nbsp;Close</button>
+  </div>
+
+  <!-- content stage -->
+  <div class="lb-stage">
+    <button class="lb-arrow" id="lb-prev">←</button>
+    <div class="lb-content-wrap" id="lb-content-wrap">
+      <!-- JS fills this with image or placeholder -->
+    </div>
+    <button class="lb-arrow" id="lb-next">→</button>
+  </div>
+
+  <!-- dot nav -->
+  <div class="lb-dots" id="lb-dots"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAVIGATION
+═══════════════════════════════════════════════════════════════ -->
+<header id="nav">
+  <a href="#hero" id="nav-logo">Ivan Amad</a>
+  <button id="nav-burger" aria-label="Menu">
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+  </button>
+</header>
+
+<div id="nav-menu">
+  <ul class="menu-list">
+    <li class="menu-item"><a class="menu-link" href="#about"><span class="menu-num">01</span>About Me</a></li>
+    <li class="menu-item"><a class="menu-link" href="#links"><span class="menu-num">02</span>My Links</a></li>
+    <li class="menu-item"><a class="menu-link" href="#concept-art"><span class="menu-num">03</span>Concept Art</a></li>
+    <li class="menu-item"><a class="menu-link" href="#storyboards"><span class="menu-num">04</span>Storyboards</a></li>
+    <li class="menu-item"><a class="menu-link" href="#branding"><span class="menu-num">05</span>Branding</a></li>
+    <li class="menu-item"><a class="menu-link" href="#logos"><span class="menu-num">06</span>Logos</a></li>
+    <li class="menu-item"><a class="menu-link" href="#pixel-art"><span class="menu-num">07</span>Pixel Art</a></li>
+    <li class="menu-item"><a class="menu-link" href="#booth-designs"><span class="menu-num">08</span>Booth Designs</a></li>
+    <li class="menu-item"><a class="menu-link" href="#social-media"><span class="menu-num">09</span>Social Media</a></li>
+  </ul>
+  <div class="menu-side">
+    <span>Visual Art Director</span>
+    <span>Multidisciplinary Designer</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════════════════ -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+
+  <div class="hero-content">
+    <p class="hero-pre">Visual Art Director &nbsp;·&nbsp; Multidisciplinary Designer</p>
+
+    <h1 class="hero-name">
+      <span class="hero-name-line"><span>IVAN</span></span>
+      <span class="hero-name-line"><span>AMAD</span></span>
+    </h1>
+
+    <p class="hero-sub">Concept&nbsp;·&nbsp;Branding&nbsp;·&nbsp;Pixel&nbsp;·&nbsp;Identity</p>
+  </div>
+
+  <div class="scroll-cue">
+    <div class="px-arrow">
+      <!-- Pixel arrow: 9×5 grid -->
+      <div class="px-row"><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell on"></div><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell on"></div><div class="px-cell off"></div><div class="px-cell off"></div></div>
+      <div class="px-row"><div class="px-cell off"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell off"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell off"></div></div>
+      <div class="px-row"><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div></div>
+      <div class="px-row"><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell off"></div><div class="px-cell off"></div></div>
+      <div class="px-row"><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell on"></div><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell off"></div></div>
+      <div class="px-row"><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell on"></div><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell off"></div><div class="px-cell off"></div></div>
+    </div>
+    <span class="scroll-text">Scroll</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MARQUEE STRIP
+═══════════════════════════════════════════════════════════════ -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span class="marquee-item">Concept Art</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Storyboards</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Branding</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Logos</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Pixel Art</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Booth Designs</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Social Media</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Visual Identity</span><span class="marquee-dot">·</span>
+    <!-- duplicate for seamless loop -->
+    <span class="marquee-item">Concept Art</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Storyboards</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Branding</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Logos</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Pixel Art</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Booth Designs</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Social Media</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Visual Identity</span><span class="marquee-dot">·</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     01 — ABOUT
+═══════════════════════════════════════════════════════════════ -->
+<section id="about" class="chapter">
+  <div class="ch-num">01</div>
+
+  <div class="left">
+    <p class="ch-label reveal">About Me</p>
+    <h2 class="ch-title reveal reveal-d1">
+      Art.<br/><span class="outline">Direction.</span><br/>Craft.
+    </h2>
+  </div>
+
+  <div class="right reveal reveal-d2">
+    <p class="about-body">
+      I'm Ivan Amad, a visual art director and multidisciplinary designer creating concept art, branding systems, social media visuals, booth designs, storyboards, logos, and pixel art. My work blends cinematic composition, strong visual identity, and experimental digital aesthetics.
+    </p>
+    <div class="about-divider"></div>
+    <div class="tags">
+      <span class="tag">Concept Art</span>
+      <span class="tag">Storyboards</span>
+      <span class="tag">Branding</span>
+      <span class="tag">Logos</span>
+      <span class="tag">Pixel Art</span>
+      <span class="tag">Booth Design</span>
+      <span class="tag">Social Media</span>
+      <span class="tag">Art Direction</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     02 — LINKS
+═══════════════════════════════════════════════════════════════ -->
+<section id="links" class="chapter">
+  <div class="ch-num">02</div>
+  <p class="ch-label reveal">My Links</p>
+  <h2 class="ch-title reveal reveal-d1">Find<br/><span class="outline">Me</span></h2>
+
+  <!--
+    TO UPDATE: Replace href="#" with your actual profile URLs:
+      ArtStation : https://www.artstation.com/YOUR_USERNAME
+      Instagram  : https://www.instagram.com/YOUR_USERNAME
+      LinkedIn   : https://www.linkedin.com/in/YOUR_USERNAME
+  -->
+  <div class="links-row reveal reveal-d2">
+    <a class="link-card" href="#" target="_blank" rel="noopener">
+      <div class="lc-num">Platform — 01</div>
+      <div class="lc-name">ArtStation</div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="#" target="_blank" rel="noopener">
+      <div class="lc-num">Platform — 02</div>
+      <div class="lc-name">Instagram</div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="#" target="_blank" rel="noopener">
+      <div class="lc-num">Platform — 03</div>
+      <div class="lc-name">LinkedIn</div>
+      <div class="lc-arr">↗</div>
+    </a>
+  </div>
+</section>
+
+<!-- MARQUEE 2 (reverse) -->
+<div class="marquee-strip">
+  <div class="marquee-inner rev">
+    <span class="marquee-item">Ivan Amad</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Art Director</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Designer</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Pixel Art</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Cinematic</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Visual Identity</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Ivan Amad</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Art Director</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Designer</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Pixel Art</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Cinematic</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Visual Identity</span><span class="marquee-dot">·</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     03 — CONCEPT ART
+═══════════════════════════════════════════════════════════════ -->
+<section id="concept-art" class="chapter">
+  <div class="ch-num">03</div>
+  <p class="ch-label reveal">Category 03</p>
+  <h2 class="ch-title reveal reveal-d1">Concept<br/><span class="outline">Art</span></h2>
+  <p class="ch-desc reveal reveal-d2">Cinematic worlds built from light, shadow, and imagination.</p>
+
+  <div class="gallery-wrap reveal reveal-d3">
+    <div class="gallery">
+      <!-- TO REPLACE each .g-card-inner with an <img class="slide-img" src="…" /> -->
+      <div class="gallery-track" id="t-ca">
+        <div class="g-card wide" onclick="openLB('Concept Art 01')">
+          <div class="g-card-inner"><span class="g-card-num">01</span><span class="g-card-cat">Concept Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Concept Art 01</span></div>
+        </div>
+        <div class="g-card wide" onclick="openLB('Concept Art 02')">
+          <div class="g-card-inner"><span class="g-card-num">02</span><span class="g-card-cat">Concept Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Concept Art 02</span></div>
+        </div>
+        <div class="g-card wide" onclick="openLB('Concept Art 03')">
+          <div class="g-card-inner"><span class="g-card-num">03</span><span class="g-card-cat">Concept Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Concept Art 03</span></div>
+        </div>
+        <div class="g-card wide" onclick="openLB('Concept Art 04')">
+          <div class="g-card-inner"><span class="g-card-num">04</span><span class="g-card-cat">Concept Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Concept Art 04</span></div>
+        </div>
+        <div class="g-card wide" onclick="openLB('Concept Art 05')">
+          <div class="g-card-inner"><span class="g-card-num">05</span><span class="g-card-cat">Concept Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Concept Art 05</span></div>
+        </div>
+        <div class="g-card wide" onclick="openLB('Concept Art 06')">
+          <div class="g-card-inner"><span class="g-card-num">06</span><span class="g-card-cat">Concept Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Concept Art 06</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-controls">
+      <div class="g-nav">
+        <button class="g-btn" onclick="gPrev('t-ca','cnt-ca','dots-ca',6)">←</button>
+        <button class="g-btn" onclick="gNext('t-ca','cnt-ca','dots-ca',6)">→</button>
+      </div>
+      <span class="g-counter" id="cnt-ca">01 / 06</span>
+      <div class="g-dots" id="dots-ca">
+        <div class="g-dot on"></div><div class="g-dot"></div><div class="g-dot"></div>
+        <div class="g-dot"></div><div class="g-dot"></div><div class="g-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     04 — STORYBOARDS
+═══════════════════════════════════════════════════════════════ -->
+<section id="storyboards" class="chapter">
+  <div class="ch-num">04</div>
+  <p class="ch-label reveal">Category 04</p>
+  <h2 class="ch-title reveal reveal-d1"><span class="outline">Story</span><br/>boards</h2>
+  <p class="ch-desc reveal reveal-d2">Sequential narratives — frame by frame, scene by scene.</p>
+
+  <div class="gallery-wrap reveal reveal-d3">
+    <div class="gallery">
+      <div class="gallery-track" id="t-sb">
+        <div class="g-card tall" onclick="openLB('Storyboard 01')">
+          <div class="g-card-inner"><span class="g-card-num">01</span><span class="g-card-cat">Storyboard</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Storyboard 01</span></div>
+        </div>
+        <div class="g-card tall" onclick="openLB('Storyboard 02')">
+          <div class="g-card-inner"><span class="g-card-num">02</span><span class="g-card-cat">Storyboard</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Storyboard 02</span></div>
+        </div>
+        <div class="g-card tall" onclick="openLB('Storyboard 03')">
+          <div class="g-card-inner"><span class="g-card-num">03</span><span class="g-card-cat">Storyboard</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Storyboard 03</span></div>
+        </div>
+        <div class="g-card tall" onclick="openLB('Storyboard 04')">
+          <div class="g-card-inner"><span class="g-card-num">04</span><span class="g-card-cat">Storyboard</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Storyboard 04</span></div>
+        </div>
+        <div class="g-card tall" onclick="openLB('Storyboard 05')">
+          <div class="g-card-inner"><span class="g-card-num">05</span><span class="g-card-cat">Storyboard</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Storyboard 05</span></div>
+        </div>
+        <div class="g-card tall" onclick="openLB('Storyboard 06')">
+          <div class="g-card-inner"><span class="g-card-num">06</span><span class="g-card-cat">Storyboard</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Storyboard 06</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-controls">
+      <div class="g-nav">
+        <button class="g-btn" onclick="gPrev('t-sb','cnt-sb','dots-sb',6)">←</button>
+        <button class="g-btn" onclick="gNext('t-sb','cnt-sb','dots-sb',6)">→</button>
+      </div>
+      <span class="g-counter" id="cnt-sb">01 / 06</span>
+      <div class="g-dots" id="dots-sb">
+        <div class="g-dot on"></div><div class="g-dot"></div><div class="g-dot"></div>
+        <div class="g-dot"></div><div class="g-dot"></div><div class="g-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     05 — BRANDING
+═══════════════════════════════════════════════════════════════ -->
+<section id="branding" class="chapter">
+  <div class="ch-num">05</div>
+  <p class="ch-label reveal">Category 05</p>
+  <h2 class="ch-title reveal reveal-d1">Brand<br/><span class="outline">Systems</span></h2>
+  <p class="ch-desc reveal reveal-d2">Visual identities built to last — cohesive, bold, distinctive.</p>
+
+  <div class="gallery-wrap reveal reveal-d3">
+    <div class="gallery">
+      <div class="gallery-track" id="t-br">
+        <div class="g-card sq" onclick="openLB('Branding 01')">
+          <div class="g-card-inner"><span class="g-card-num">01</span><span class="g-card-cat">Branding</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Branding 01</span></div>
+        </div>
+        <div class="g-card sq" onclick="openLB('Branding 02')">
+          <div class="g-card-inner"><span class="g-card-num">02</span><span class="g-card-cat">Branding</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Branding 02</span></div>
+        </div>
+        <div class="g-card sq" onclick="openLB('Branding 03')">
+          <div class="g-card-inner"><span class="g-card-num">03</span><span class="g-card-cat">Branding</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Branding 03</span></div>
+        </div>
+        <div class="g-card sq" onclick="openLB('Branding 04')">
+          <div class="g-card-inner"><span class="g-card-num">04</span><span class="g-card-cat">Branding</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Branding 04</span></div>
+        </div>
+        <div class="g-card sq" onclick="openLB('Branding 05')">
+          <div class="g-card-inner"><span class="g-card-num">05</span><span class="g-card-cat">Branding</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Branding 05</span></div>
+        </div>
+        <div class="g-card sq" onclick="openLB('Branding 06')">
+          <div class="g-card-inner"><span class="g-card-num">06</span><span class="g-card-cat">Branding</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Branding 06</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-controls">
+      <div class="g-nav">
+        <button class="g-btn" onclick="gPrev('t-br','cnt-br','dots-br',6)">←</button>
+        <button class="g-btn" onclick="gNext('t-br','cnt-br','dots-br',6)">→</button>
+      </div>
+      <span class="g-counter" id="cnt-br">01 / 06</span>
+      <div class="g-dots" id="dots-br">
+        <div class="g-dot on"></div><div class="g-dot"></div><div class="g-dot"></div>
+        <div class="g-dot"></div><div class="g-dot"></div><div class="g-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     06 — LOGOS
+═══════════════════════════════════════════════════════════════ -->
+<section id="logos" class="chapter">
+  <div class="ch-num">06</div>
+  <p class="ch-label reveal">Category 06</p>
+  <h2 class="ch-title reveal reveal-d1"><span class="outline">Logo</span><br/>Marks</h2>
+  <p class="ch-desc reveal reveal-d2">Pure symbols. Distilled essence. Marks that speak without words.</p>
+
+  <div class="gallery-wrap reveal reveal-d3">
+    <div class="gallery">
+      <div class="gallery-track" id="t-lg">
+        <div class="g-card sq-sm" onclick="openLB('Logo 01')">
+          <div class="g-card-inner"><span class="g-card-num">01</span><span class="g-card-cat">Logo</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Logo 01</span></div>
+        </div>
+        <div class="g-card sq-sm" onclick="openLB('Logo 02')">
+          <div class="g-card-inner"><span class="g-card-num">02</span><span class="g-card-cat">Logo</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Logo 02</span></div>
+        </div>
+        <div class="g-card sq-sm" onclick="openLB('Logo 03')">
+          <div class="g-card-inner"><span class="g-card-num">03</span><span class="g-card-cat">Logo</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Logo 03</span></div>
+        </div>
+        <div class="g-card sq-sm" onclick="openLB('Logo 04')">
+          <div class="g-card-inner"><span class="g-card-num">04</span><span class="g-card-cat">Logo</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Logo 04</span></div>
+        </div>
+        <div class="g-card sq-sm" onclick="openLB('Logo 05')">
+          <div class="g-card-inner"><span class="g-card-num">05</span><span class="g-card-cat">Logo</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Logo 05</span></div>
+        </div>
+        <div class="g-card sq-sm" onclick="openLB('Logo 06')">
+          <div class="g-card-inner"><span class="g-card-num">06</span><span class="g-card-cat">Logo</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Logo 06</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-controls">
+      <div class="g-nav">
+        <button class="g-btn" onclick="gPrev('t-lg','cnt-lg','dots-lg',6)">←</button>
+        <button class="g-btn" onclick="gNext('t-lg','cnt-lg','dots-lg',6)">→</button>
+      </div>
+      <span class="g-counter" id="cnt-lg">01 / 06</span>
+      <div class="g-dots" id="dots-lg">
+        <div class="g-dot on"></div><div class="g-dot"></div><div class="g-dot"></div>
+        <div class="g-dot"></div><div class="g-dot"></div><div class="g-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     07 — PIXEL ART
+═══════════════════════════════════════════════════════════════ -->
+<section id="pixel-art" class="chapter">
+  <div class="ch-num">07</div>
+  <p class="ch-label reveal">Category 07</p>
+  <h2 class="ch-title reveal reveal-d1">Pixel<br/><span class="outline">Art</span></h2>
+  <p class="ch-desc reveal reveal-d2">Digital worlds one pixel at a time — retro precision, modern soul.</p>
+
+  <!-- pixel strip accent -->
+  <div class="px-strip reveal reveal-d2">
+    <span class="px-strip-inner">
+      ██░░██░░██░░ PIXEL ART ░░██░░██░░██░░ IVAN AMAD ░░██░░██░░██░░ PIXEL ART ░░██░░██░░██░░ IVAN AMAD ░░██░░██░░██░░ PIXEL ART ░░██░░██░░██░░ IVAN AMAD ░░██░░██░░██░░ PIXEL ART ░░██░░██░░██░░
+    </span>
+  </div>
+
+  <div class="gallery-wrap reveal reveal-d3">
+    <div class="gallery">
+      <div class="gallery-track" id="t-pa">
+        <div class="g-card sq-sm px-card" onclick="openLB('Pixel Art 01')">
+          <div class="g-card-inner"><span class="g-card-num">01</span><span class="g-card-cat">Pixel Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Pixel Art 01</span></div>
+        </div>
+        <div class="g-card sq-sm px-card" onclick="openLB('Pixel Art 02')">
+          <div class="g-card-inner"><span class="g-card-num">02</span><span class="g-card-cat">Pixel Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Pixel Art 02</span></div>
+        </div>
+        <div class="g-card sq-sm px-card" onclick="openLB('Pixel Art 03')">
+          <div class="g-card-inner"><span class="g-card-num">03</span><span class="g-card-cat">Pixel Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Pixel Art 03</span></div>
+        </div>
+        <div class="g-card sq-sm px-card" onclick="openLB('Pixel Art 04')">
+          <div class="g-card-inner"><span class="g-card-num">04</span><span class="g-card-cat">Pixel Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Pixel Art 04</span></div>
+        </div>
+        <div class="g-card sq-sm px-card" onclick="openLB('Pixel Art 05')">
+          <div class="g-card-inner"><span class="g-card-num">05</span><span class="g-card-cat">Pixel Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Pixel Art 05</span></div>
+        </div>
+        <div class="g-card sq-sm px-card" onclick="openLB('Pixel Art 06')">
+          <div class="g-card-inner"><span class="g-card-num">06</span><span class="g-card-cat">Pixel Art</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Pixel Art 06</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-controls">
+      <div class="g-nav">
+        <button class="g-btn" onclick="gPrev('t-pa','cnt-pa','dots-pa',6)">←</button>
+        <button class="g-btn" onclick="gNext('t-pa','cnt-pa','dots-pa',6)">→</button>
+      </div>
+      <span class="g-counter" id="cnt-pa">01 / 06</span>
+      <div class="g-dots" id="dots-pa">
+        <div class="g-dot on"></div><div class="g-dot"></div><div class="g-dot"></div>
+        <div class="g-dot"></div><div class="g-dot"></div><div class="g-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     08 — BOOTH DESIGNS
+═══════════════════════════════════════════════════════════════ -->
+<section id="booth-designs" class="chapter">
+  <div class="ch-num">08</div>
+  <p class="ch-label reveal">Category 08</p>
+  <h2 class="ch-title reveal reveal-d1">Booth<br/><span class="outline">Designs</span></h2>
+  <p class="ch-desc reveal reveal-d2">Spatial brand experiences — environments that speak volumes.</p>
+
+  <div class="gallery-wrap reveal reveal-d3">
+    <div class="gallery">
+      <div class="gallery-track" id="t-bd">
+        <div class="g-card pano" onclick="openLB('Booth Design 01')">
+          <div class="g-card-inner"><span class="g-card-num">01</span><span class="g-card-cat">Booth Design</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Booth Design 01</span></div>
+        </div>
+        <div class="g-card pano" onclick="openLB('Booth Design 02')">
+          <div class="g-card-inner"><span class="g-card-num">02</span><span class="g-card-cat">Booth Design</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Booth Design 02</span></div>
+        </div>
+        <div class="g-card pano" onclick="openLB('Booth Design 03')">
+          <div class="g-card-inner"><span class="g-card-num">03</span><span class="g-card-cat">Booth Design</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Booth Design 03</span></div>
+        </div>
+        <div class="g-card pano" onclick="openLB('Booth Design 04')">
+          <div class="g-card-inner"><span class="g-card-num">04</span><span class="g-card-cat">Booth Design</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Booth Design 04</span></div>
+        </div>
+        <div class="g-card pano" onclick="openLB('Booth Design 05')">
+          <div class="g-card-inner"><span class="g-card-num">05</span><span class="g-card-cat">Booth Design</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Booth Design 05</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-controls">
+      <div class="g-nav">
+        <button class="g-btn" onclick="gPrev('t-bd','cnt-bd','dots-bd',5)">←</button>
+        <button class="g-btn" onclick="gNext('t-bd','cnt-bd','dots-bd',5)">→</button>
+      </div>
+      <span class="g-counter" id="cnt-bd">01 / 05</span>
+      <div class="g-dots" id="dots-bd">
+        <div class="g-dot on"></div><div class="g-dot"></div><div class="g-dot"></div>
+        <div class="g-dot"></div><div class="g-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     09 — SOCIAL MEDIA
+═══════════════════════════════════════════════════════════════ -->
+<section id="social-media" class="chapter">
+  <div class="ch-num">09</div>
+  <p class="ch-label reveal">Category 09</p>
+  <h2 class="ch-title reveal reveal-d1">Social<br/><span class="outline">Media</span></h2>
+  <p class="ch-desc reveal reveal-d2">Scroll-stopping visuals designed for the digital feed.</p>
+
+  <div class="gallery-wrap reveal reveal-d3">
+    <div class="gallery">
+      <div class="gallery-track" id="t-sm">
+        <div class="g-card port" onclick="openLB('Social Media 01')">
+          <div class="g-card-inner"><span class="g-card-num">01</span><span class="g-card-cat">Social</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Social Media 01</span></div>
+        </div>
+        <div class="g-card port" onclick="openLB('Social Media 02')">
+          <div class="g-card-inner"><span class="g-card-num">02</span><span class="g-card-cat">Social</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Social Media 02</span></div>
+        </div>
+        <div class="g-card port" onclick="openLB('Social Media 03')">
+          <div class="g-card-inner"><span class="g-card-num">03</span><span class="g-card-cat">Social</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Social Media 03</span></div>
+        </div>
+        <div class="g-card port" onclick="openLB('Social Media 04')">
+          <div class="g-card-inner"><span class="g-card-num">04</span><span class="g-card-cat">Social</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Social Media 04</span></div>
+        </div>
+        <div class="g-card port" onclick="openLB('Social Media 05')">
+          <div class="g-card-inner"><span class="g-card-num">05</span><span class="g-card-cat">Social</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Social Media 05</span></div>
+        </div>
+        <div class="g-card port" onclick="openLB('Social Media 06')">
+          <div class="g-card-inner"><span class="g-card-num">06</span><span class="g-card-cat">Social</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Social Media 06</span></div>
+        </div>
+        <div class="g-card port" onclick="openLB('Social Media 07')">
+          <div class="g-card-inner"><span class="g-card-num">07</span><span class="g-card-cat">Social</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Social Media 07</span></div>
+        </div>
+        <div class="g-card port" onclick="openLB('Social Media 08')">
+          <div class="g-card-inner"><span class="g-card-num">08</span><span class="g-card-cat">Social</span></div>
+          <div class="g-card-hover"><span class="g-card-hover-label">Social Media 08</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-controls">
+      <div class="g-nav">
+        <button class="g-btn" onclick="gPrev('t-sm','cnt-sm','dots-sm',8)">←</button>
+        <button class="g-btn" onclick="gNext('t-sm','cnt-sm','dots-sm',8)">→</button>
+      </div>
+      <span class="g-counter" id="cnt-sm">01 / 08</span>
+      <div class="g-dots" id="dots-sm">
+        <div class="g-dot on"></div><div class="g-dot"></div><div class="g-dot"></div>
+        <div class="g-dot"></div><div class="g-dot"></div><div class="g-dot"></div>
+        <div class="g-dot"></div><div class="g-dot"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════════════════ -->
+<footer id="footer">
+  <h2 class="footer-title reveal">
+    Let's build<br/><span class="outline">something real.</span>
+  </h2>
+  <p class="footer-sub reveal reveal-d1">Visual Art Director &nbsp;·&nbsp; Ivan Amad</p>
+  <a href="#hero" class="back-top reveal reveal-d2">↑ &nbsp; Back to top</a>
+  <p class="footer-copy reveal reveal-d3">© 2026 — Ivan Amad. All rights reserved.</p>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+/* ─── GRAIN ─────────────────────────────────────────────────────── */
+(function(){
+  const c = document.getElementById('grain');
+  const x = c.getContext('2d');
+  function resize(){
+    c.width  = window.innerWidth;
+    c.height = window.innerHeight;
+    c.style.position = 'fixed';
+    c.style.inset = '0';
+    c.style.pointerEvents = 'none';
+    c.style.zIndex = '8000';
+    c.style.opacity = '.04';
+  }
+  function frame(){
+    const id = x.createImageData(c.width, c.height);
+    const d  = new Uint32Array(id.data.buffer);
+    for(let i=d.length;i--;){
+      const v = Math.random()*255|0;
+      d[i] = (255<<24)|(v<<16)|(v<<8)|v;
+    }
+    x.putImageData(id,0,0);
+    requestAnimationFrame(frame);
+  }
+  resize(); frame();
+  window.addEventListener('resize', resize);
+})();
+
+/* ─── GLOBAL BACKGROUND CANVAS (floating geometric shapes) ─────── */
+(function(){
+  const cv  = document.getElementById('bg-canvas');
+  const ctx = cv.getContext('2d');
+  let W, H, scrollY = 0;
+
+  function resize(){
+    W = cv.width  = window.innerWidth;
+    H = cv.height = window.innerHeight;
+    cv.style.position = 'fixed';
+    cv.style.inset = '0';
+    cv.style.zIndex = '1';
+    cv.style.pointerEvents = 'none';
+  }
+
+  // shape definitions — large, slow, ghostly
+  const SHAPES = [
+    { type:'circle', x:.15, y:.2,  r:.18, vx:.00012, vy:.00008, rot:0, vr:.0004, a:.022 },
+    { type:'circle', x:.8,  y:.7,  r:.22, vx:-.0001, vy:.00015, rot:0, vr:-.0003, a:.018 },
+    { type:'rect',   x:.55, y:.3,  r:.14, vx:.00008, vy:-.0001, rot:.5, vr:.0006, a:.016 },
+    { type:'circle', x:.3,  y:.8,  r:.12, vx:.00015, vy:.00012, rot:0, vr:.0002, a:.02  },
+    { type:'rect',   x:.7,  y:.15, r:.1,  vx:-.00012,vy:.00009, rot:.2, vr:-.0005, a:.015 },
+    { type:'line',   x:.1,  y:.5,  r:.25, vx:.0001,  vy:.0001,  rot:.8, vr:.0003, a:.025 },
+    { type:'circle', x:.9,  y:.45, r:.09, vx:-.00009,vy:-.0001, rot:0, vr:.0004, a:.02  },
+    { type:'rect',   x:.45, y:.65, r:.16, vx:.00007, vy:.00011, rot:1.2, vr:-.0004, a:.014 },
+  ];
+
+  let t = 0;
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    t += 1;
+    const parallax = (scrollY || window.scrollY) * .0004;
+
+    SHAPES.forEach((s,i)=>{
+      s.x += s.vx; s.y += s.vy + Math.sin(t*.005 + i)*.00008;
+      s.rot += s.vr;
+      if(s.x < -s.r*2) s.x = 1+s.r;
+      if(s.x > 1+s.r*2) s.x = -s.r;
+      if(s.y < -s.r*2) s.y = 1+s.r;
+      if(s.y > 1+s.r*2) s.y = -s.r;
+
+      const px = s.x*W;
+      const py = s.y*H + parallax*W*s.r*40;
+      const pr = s.r*Math.min(W,H);
+
+      ctx.save();
+      ctx.translate(px,py);
+      ctx.rotate(s.rot + t*.0003);
+      ctx.strokeStyle = `rgba(255,255,255,${s.a + Math.sin(t*.008+i)*.006})`;
+      ctx.lineWidth   = .8;
+
+      if(s.type==='circle'){
+        ctx.beginPath();
+        ctx.arc(0,0,pr,0,Math.PI*2);
+        ctx.stroke();
+        // inner ring
+        ctx.beginPath();
+        ctx.arc(0,0,pr*.5,0,Math.PI*2);
+        ctx.globalAlpha = .4;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      } else if(s.type==='rect'){
+        ctx.strokeRect(-pr,-pr,pr*2,pr*2);
+        // inner square rotated 45deg
+        ctx.save();
+        ctx.rotate(Math.PI*.25);
+        ctx.globalAlpha = .35;
+        ctx.strokeRect(-pr*.7,-pr*.7,pr*1.4,pr*1.4);
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      } else if(s.type==='line'){
+        ctx.beginPath();
+        ctx.moveTo(-pr,0); ctx.lineTo(pr,0);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0,-pr*.6); ctx.lineTo(0,pr*.6);
+        ctx.globalAlpha = .5;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+    });
+
+    requestAnimationFrame(frame);
+  }
+
+  resize(); frame();
+  window.addEventListener('resize', resize);
+  window.addEventListener('scroll', ()=>{ scrollY = window.scrollY; }, { passive:true });
+})();
+
+/* ─── HERO CANVAS ──────────────────────────────────────────────── */
+(function(){
+  const canvas = document.getElementById('hero-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, mouse = {x:-999, y:-999};
+  const DOTS = [];
+  const COUNT = 80;
+
+  function resize(){
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+
+  function Dot(){
+    this.x  = Math.random()*W;
+    this.y  = Math.random()*H;
+    this.vx = (Math.random()-.5)*.35;
+    this.vy = (Math.random()-.5)*.35;
+    this.r  = Math.random()*1.5+.5;
+    this.a  = Math.random();
+  }
+  Dot.prototype.update = function(){
+    // subtle mouse repulsion
+    const dx = this.x - mouse.x;
+    const dy = this.y - mouse.y;
+    const d  = Math.sqrt(dx*dx+dy*dy);
+    if(d < 120){
+      this.vx += dx/d * .02;
+      this.vy += dy/d * .02;
+    }
+    this.vx *= .98; this.vy *= .98;
+    this.x += this.vx; this.y += this.vy;
+    if(this.x<0||this.x>W) this.vx*=-1;
+    if(this.y<0||this.y>H) this.vy*=-1;
+    this.a += (Math.random()-.5)*.02;
+    this.a = Math.max(.1,Math.min(1,this.a));
+  };
+
+  for(let i=0;i<COUNT;i++) DOTS.push(new Dot());
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // draw connections
+    for(let i=0;i<DOTS.length;i++){
+      for(let j=i+1;j<DOTS.length;j++){
+        const dx = DOTS[i].x - DOTS[j].x;
+        const dy = DOTS[i].y - DOTS[j].y;
+        const d  = Math.sqrt(dx*dx+dy*dy);
+        if(d < 140){
+          ctx.beginPath();
+          ctx.moveTo(DOTS[i].x, DOTS[i].y);
+          ctx.lineTo(DOTS[j].x, DOTS[j].y);
+          ctx.strokeStyle = `rgba(255,255,255,${(1-d/140)*.12})`;
+          ctx.lineWidth   = .5;
+          ctx.stroke();
+        }
+      }
+    }
+    // draw dots
+    DOTS.forEach(d=>{
+      d.update();
+      ctx.beginPath();
+      ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${d.a*.5})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  resize(); draw();
+  window.addEventListener('resize', resize);
+  document.getElementById('hero').addEventListener('mousemove', e=>{
+    const r = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - r.left;
+    mouse.y = e.clientY - r.top;
+  });
+  document.getElementById('hero').addEventListener('mouseleave', ()=>{
+    mouse = {x:-999, y:-999};
+  });
+})();
+
+/* ─── CURSOR ───────────────────────────────────────────────────── */
+const cDot   = document.getElementById('c-dot');
+const cRing  = document.getElementById('c-ring');
+const cLabel = document.getElementById('c-label');
+let mx=0, my=0, rx=0, ry=0;
+
+const TRAIL_COUNT = 6;
+const trails = [];
+for(let i=0;i<TRAIL_COUNT;i++){
+  const d = document.createElement('div');
+  d.className = 'c-trail';
+  d.style.opacity = (1-(i/TRAIL_COUNT))*.4;
+  d.style.width = d.style.height = (4-i*.4)+'px';
+  document.body.appendChild(d);
+  trails.push({el:d, x:0, y:0});
+}
+
+document.addEventListener('mousemove', e=>{
+  mx = e.clientX; my = e.clientY;
+  cDot.style.left = mx+'px'; cDot.style.top = my+'px';
+});
+
+(function raf(){
+  // ring follows with lag
+  rx += (mx-rx)*.1; ry += (my-ry)*.1;
+  cRing.style.left  = rx+'px'; cRing.style.top  = ry+'px';
+  cLabel.style.left = rx+'px'; cLabel.style.top = ry+'px';
+  // trail follows ring with increasing lag
+  trails[0].x += (rx - trails[0].x)*.35;
+  trails[0].y += (ry - trails[0].y)*.35;
+  for(let i=1;i<trails.length;i++){
+    trails[i].x += (trails[i-1].x - trails[i].x)*.35;
+    trails[i].y += (trails[i-1].y - trails[i].y)*.35;
+  }
+  trails.forEach(t=>{
+    t.el.style.left = t.x+'px';
+    t.el.style.top  = t.y+'px';
+  });
+  requestAnimationFrame(raf);
+})();
+
+// hover state
+document.querySelectorAll('a,button,.g-card,.link-card,.tag').forEach(el=>{
+  el.addEventListener('mouseenter',()=> document.body.classList.add('c-hover'));
+  el.addEventListener('mouseleave',()=> document.body.classList.remove('c-hover'));
+});
+
+/* ─── NAVIGATION ───────────────────────────────────────────────── */
+const burger = document.getElementById('nav-burger');
+const menu   = document.getElementById('nav-menu');
+burger.addEventListener('click',()=>{
+  burger.classList.toggle('open');
+  menu.classList.toggle('open');
+});
+// close on menu link click
+menu.querySelectorAll('.menu-link').forEach(a=>{
+  a.addEventListener('click',()=>{
+    burger.classList.remove('open');
+    menu.classList.remove('open');
+  });
+});
+
+/* ─── LIGHTBOX — FULL SCALE ────────────────────────────────────── */
+let lbCards   = [];   // array of {label, card element} for current category
+let lbCurrent = 0;
+let lbZoomed  = false;
+
+function parseLBLabel(label){
+  // "Concept Art 03" → { cat:'Concept Art', idx:2 }
+  const m = label.match(/^(.+?)\s+(\d+)$/);
+  return m ? { cat: m[1], idx: parseInt(m[2]) - 1 } : { cat: label, idx: 0 };
+}
+
+function buildLBDots(total){
+  const wrap = document.getElementById('lb-dots');
+  wrap.innerHTML = '';
+  for(let i=0;i<total;i++){
+    const d = document.createElement('div');
+    d.className = 'lb-dot';
+    wrap.appendChild(d);
+  }
+}
+
+function setLBDot(idx){
+  document.querySelectorAll('#lb-dots .lb-dot').forEach((d,i)=>{
+    d.classList.toggle('on', i===idx);
+  });
+}
+
+function renderLBSlide(idx, direction){
+  const wrap  = document.getElementById('lb-content-wrap');
+  const info  = lbCards[idx];
+  const card  = info ? info.card : null;
+  const label = info ? info.label : '';
+
+  // slide-out current
+  wrap.classList.add('sliding-out');
+
+  setTimeout(()=>{
+    wrap.classList.remove('sliding-out');
+    wrap.classList.add('sliding-in');
+    lbZoomed = false;
+    wrap.classList.remove('zoomed');
+
+    // detect real image inside card
+    const img = card ? card.querySelector('img.slide-img') : null;
+    if(img){
+      wrap.innerHTML = `<img src="${img.src}" alt="${label}" loading="lazy" />`;
+      wrap.querySelector('img').addEventListener('click', toggleZoom);
+    } else {
+      const p = parseLBLabel(label);
+      wrap.innerHTML = `
+        <div class="lb-placeholder">
+          <span class="lb-p-num">${String(idx+1).padStart(2,'0')}</span>
+          <span class="lb-p-label">${label}</span>
+          <span class="lb-p-sub">Replace .g-card-inner with &lt;img class="slide-img" src="…"&gt;</span>
+        </div>`;
+    }
+
+    // update meta
+    document.getElementById('lb-title').textContent   = label;
+    document.getElementById('lb-counter').textContent =
+      String(idx+1).padStart(2,'0')+' / '+String(lbCards.length).padStart(2,'0');
+    setLBDot(idx);
+
+    requestAnimationFrame(()=>{
+      wrap.classList.remove('sliding-in');
+    });
+  }, direction !== 0 ? 220 : 0);
+}
+
+function toggleZoom(){
+  const wrap = document.getElementById('lb-content-wrap');
+  lbZoomed = !lbZoomed;
+  wrap.classList.toggle('zoomed', lbZoomed);
+}
+
+function openLB(label){
+  const { cat, idx } = parseLBLabel(label);
+
+  // gather all cards in same category
+  lbCards = Array.from(document.querySelectorAll('.g-card-hover-label'))
+    .filter(el => el.textContent.trim().startsWith(cat))
+    .map(el => ({ label: el.textContent.trim(), card: el.closest('.g-card') }));
+
+  lbCurrent = Math.min(idx, lbCards.length - 1);
+
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lb-cat').textContent = cat;
+  buildLBDots(lbCards.length);
+  renderLBSlide(lbCurrent, 0);
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLB(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function lbNext(){
+  if(lbCurrent < lbCards.length - 1){
+    lbCurrent++;
+    renderLBSlide(lbCurrent, 1);
+  }
+}
+function lbPrev(){
+  if(lbCurrent > 0){
+    lbCurrent--;
+    renderLBSlide(lbCurrent, -1);
+  }
+}
+
+document.getElementById('lb-close').addEventListener('click', closeLB);
+document.getElementById('lb-next').addEventListener('click', lbNext);
+document.getElementById('lb-prev').addEventListener('click', lbPrev);
+document.getElementById('lightbox').addEventListener('click', e=>{
+  if(e.target === document.getElementById('lightbox') ||
+     e.target === document.querySelector('.lb-stage')) closeLB();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape')      closeLB();
+  if(e.key==='ArrowRight')  lbNext();
+  if(e.key==='ArrowLeft')   lbPrev();
+});
+
+/* ─── GALLERY SLIDER ───────────────────────────────────────────── */
+const gState = {};
+
+function getGState(id){ if(!gState[id]) gState[id]={idx:0}; return gState[id]; }
+
+function cardW(trackId){
+  const track = document.getElementById(trackId);
+  const card  = track.querySelector('.g-card');
+  if(!card) return 0;
+  return card.offsetWidth + 20; // 20 = gap
+}
+
+function updateG(trackId, counterId, dotsId, total){
+  const s = getGState(trackId);
+  const track = document.getElementById(trackId);
+  track.style.transform = `translateX(-${s.idx * cardW(trackId)}px)`;
+  // counter
+  const cnt = document.getElementById(counterId);
+  if(cnt) cnt.textContent = String(s.idx+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+  // dots
+  const dotsEl = document.getElementById(dotsId);
+  if(dotsEl){
+    dotsEl.querySelectorAll('.g-dot').forEach((d,i)=>{
+      d.classList.toggle('on', i===s.idx);
+    });
+  }
+}
+
+function gNext(trackId, counterId, dotsId, total){
+  const s = getGState(trackId);
+  s.idx = Math.min(s.idx+1, total-1);
+  updateG(trackId, counterId, dotsId, total);
+}
+function gPrev(trackId, counterId, dotsId, total){
+  const s = getGState(trackId);
+  s.idx = Math.max(s.idx-1, 0);
+  updateG(trackId, counterId, dotsId, total);
+}
+
+// keyboard arrows when gallery is in view (skip if lightbox is open)
+document.addEventListener('keydown', e=>{
+  const focused = document.activeElement;
+  if(focused && (focused.tagName==='INPUT'||focused.tagName==='TEXTAREA')) return;
+  if(document.getElementById('lightbox').classList.contains('open')) return;
+  // find the most-centered gallery chapter
+  const chapters = document.querySelectorAll('.chapter');
+  let closest = null; let minD = Infinity;
+  chapters.forEach(ch=>{
+    const rect = ch.getBoundingClientRect();
+    const d = Math.abs(rect.top + rect.height/2 - window.innerHeight/2);
+    if(d < minD){ minD=d; closest=ch; }
+  });
+  if(!closest) return;
+  const btns = closest.querySelectorAll('.g-btn');
+  if(e.key==='ArrowRight' && btns[1]) btns[1].click();
+  if(e.key==='ArrowLeft'  && btns[0]) btns[0].click();
+});
+
+// touch swipe
+document.querySelectorAll('.gallery').forEach(g=>{
+  let startX=0;
+  g.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; });
+  g.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - startX;
+    if(Math.abs(dx)<40) return;
+    const controls = g.closest('.gallery-wrap')?.nextElementSibling || g.closest('.chapter')?.querySelector('.gallery-controls');
+    if(!controls) return;
+    const btns = controls.querySelectorAll('.g-btn');
+    if(dx < 0 && btns[1]) btns[1].click();
+    else if(dx > 0 && btns[0]) btns[0].click();
+  });
+});
+
+/* ─── SCROLL REVEAL ────────────────────────────────────────────── */
+const revealObs = new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting) en.target.classList.add('in');
+  });
+}, { threshold:.14 });
+
+document.querySelectorAll('.reveal').forEach(el=> revealObs.observe(el));
+
+/* ─── MAGNETIC LINK CARDS ──────────────────────────────────────── */
+document.querySelectorAll('.link-card').forEach(card=>{
+  card.addEventListener('mousemove', e=>{
+    const r  = card.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width/2);
+    const dy = e.clientY - (r.top  + r.height/2);
+    card.style.transform = `translate(${dx*.05}px,${dy*.05}px)`;
+  });
+  card.addEventListener('mouseleave',()=>{ card.style.transform=''; });
+});
+
+/* ─── NAV BLEND FIX ON SCROLL ──────────────────────────────────── */
+/* The nav uses mix-blend-mode:difference to auto-invert on white bg */
+</script>
+</body>
+</html>

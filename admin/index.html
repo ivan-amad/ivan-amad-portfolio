@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ivan Amad — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0900;
+  --bg2:#111009;
+  --bg3:#1a1810;
+  --y:#FFD600;
+  --yd:rgba(255,210,0,.15);
+  --yl:rgba(255,210,0,.5);
+  --txt:rgba(255,255,255,.82);
+  --txt2:rgba(255,255,255,.45);
+  --red:#ff4444;
+  --r: 6px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Poppins',sans-serif;background:var(--bg);color:var(--txt);font-size:14px;}
+
+/* ─── Login Screen ──────────────────────────────────────────────────────── */
+#login-screen{
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:32px;
+}
+#login-screen.hidden{display:none;}
+.ls-logo{font-size:56px;font-weight:900;color:var(--y);letter-spacing:-.04em;
+  text-shadow:0 2px 0 #F0C800,0 4px 0 #D4A800,0 6px 4px rgba(0,0,0,.4);}
+.ls-sub{font-size:9px;font-weight:600;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,210,0,.3);margin-top:-18px;}
+.ls-form{display:flex;flex-direction:column;gap:12px;width:260px;}
+.ls-form input{
+  width:100%;background:transparent;
+  border:none;border-bottom:1px solid rgba(255,210,0,.25);
+  color:var(--y);font-family:'Poppins',sans-serif;font-size:14px;
+  font-weight:400;letter-spacing:.1em;padding:11px 0;outline:none;
+  transition:border-color .25s;
+}
+.ls-form input::placeholder{color:rgba(255,210,0,.22);letter-spacing:.25em;}
+.ls-form input:focus{border-bottom-color:rgba(255,210,0,.7);}
+.btn-primary{
+  background:var(--y);color:var(--bg);
+  border:none;font-family:'Poppins',sans-serif;
+  font-size:9px;font-weight:700;letter-spacing:.55em;
+  text-transform:uppercase;padding:13px;cursor:pointer;
+  transition:opacity .2s;border-radius:2px;
+}
+.btn-primary:hover{opacity:.85;}
+.ls-err{font-size:10px;letter-spacing:.2em;color:rgba(255,70,70,.8);min-height:14px;text-align:center;}
+
+/* ─── App Shell ─────────────────────────────────────────────────────────── */
+#app{display:flex;height:100%;opacity:0;transition:opacity .4s;}
+#app.ready{opacity:1;}
+
+/* ─── Sidebar ───────────────────────────────────────────────────────────── */
+#sidebar{
+  width:220px;min-width:220px;background:var(--bg2);
+  border-right:1px solid rgba(255,210,0,.07);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.sb-logo{padding:24px 20px 18px;border-bottom:1px solid rgba(255,210,0,.07);}
+.sb-logo span{font-size:20px;font-weight:900;color:var(--y);letter-spacing:-.03em;}
+.sb-logo small{display:block;font-size:8px;font-weight:600;letter-spacing:.5em;
+  text-transform:uppercase;color:rgba(255,210,0,.28);margin-top:2px;}
+.sb-section{padding:16px 12px 4px;font-size:8px;font-weight:700;
+  letter-spacing:.5em;text-transform:uppercase;color:rgba(255,210,0,.22);}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;cursor:pointer;
+  border-radius:var(--r);margin:1px 8px;
+  font-size:12px;font-weight:500;color:var(--txt2);
+  transition:background .15s,color .15s;
+  border:1px solid transparent;
+}
+.sb-item:hover{background:var(--yd);color:var(--txt);}
+.sb-item.active{background:rgba(255,210,0,.12);color:var(--y);border-color:rgba(255,210,0,.12);}
+.sb-item .sb-num{font-size:8px;font-weight:700;color:rgba(255,210,0,.3);margin-left:auto;}
+.sb-spacer{flex:1;}
+.sb-logout{
+  margin:12px 8px;padding:10px 16px;
+  background:rgba(255,60,60,.06);border:1px solid rgba(255,60,60,.12);
+  border-radius:var(--r);color:rgba(255,100,100,.6);
+  font-size:11px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  transition:background .15s,color .15s;
+}
+.sb-logout:hover{background:rgba(255,60,60,.12);color:rgba(255,100,100,.9);}
+
+/* ─── Main Content ──────────────────────────────────────────────────────── */
+#main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+
+/* Top bar */
+.topbar{
+  padding:20px 28px;border-bottom:1px solid rgba(255,210,0,.07);
+  display:flex;align-items:center;gap:16px;background:var(--bg);
+  position:sticky;top:0;z-index:10;
+}
+.topbar-title{font-size:18px;font-weight:700;color:#fff;}
+.topbar-sub{font-size:11px;color:var(--txt2);margin-left:4px;}
+.topbar-spacer{flex:1;}
+.badge{
+  font-size:8px;font-weight:700;letter-spacing:.4em;text-transform:uppercase;
+  padding:5px 12px;border-radius:2px;background:rgba(255,210,0,.1);
+  border:1px solid rgba(255,210,0,.2);color:var(--yl);
+}
+
+/* Page sections */
+.page{display:none;padding:28px;}
+.page.active{display:block;}
+
+/* ─── Cards & Grids ─────────────────────────────────────────────────────── */
+.card{background:var(--bg2);border:1px solid rgba(255,210,0,.07);border-radius:var(--r);padding:20px;}
+.card + .card{margin-top:16px;}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.card-head h3{font-size:13px;font-weight:700;color:#fff;}
+.card-head .ch-sub{font-size:10px;color:var(--txt2);}
+.card-head .ch-spacer{flex:1;}
+
+/* ─── Upload Zone ───────────────────────────────────────────────────────── */
+.upzone{
+  border:2px dashed rgba(255,210,0,.2);border-radius:var(--r);
+  padding:28px;text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;position:relative;
+}
+.upzone:hover,.upzone.drag-over{
+  border-color:rgba(255,210,0,.6);background:rgba(255,210,0,.04);
+}
+.upzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upzone .uz-icon{font-size:28px;color:rgba(255,210,0,.3);margin-bottom:8px;}
+.upzone .uz-label{font-size:11px;font-weight:600;color:var(--txt2);letter-spacing:.1em;}
+.upzone .uz-sub{font-size:9px;color:rgba(255,255,255,.25);margin-top:4px;}
+.upzone.uploading{pointer-events:none;}
+.upzone.uploading .uz-label{color:var(--y);}
+
+/* ─── Image Thumbs ──────────────────────────────────────────────────────── */
+.thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:14px;}
+.thumb{
+  position:relative;background:var(--bg3);border-radius:4px;
+  overflow:hidden;aspect-ratio:1;border:1px solid rgba(255,255,255,.06);
+}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.thumb .thumb-del{
+  position:absolute;top:6px;right:6px;
+  background:rgba(0,0,0,.75);border:none;border-radius:3px;
+  color:#fff;font-size:10px;padding:4px 6px;cursor:pointer;
+  opacity:0;transition:opacity .15s;
+}
+.thumb:hover .thumb-del{opacity:1;}
+.thumb .thumb-del:hover{background:var(--red);}
+.thumb .thumb-label{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(0,0,0,.7);font-size:8px;padding:4px 6px;
+  color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.thumb-empty{
+  aspect-ratio:1;background:var(--bg3);border:2px dashed rgba(255,255,255,.07);
+  border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:rgba(255,255,255,.1);cursor:pointer;
+  transition:border-color .15s,color .15s;position:relative;
+}
+.thumb-empty:hover{border-color:rgba(255,210,0,.3);color:rgba(255,210,0,.4);}
+.thumb-empty input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+
+/* ─── Cover Slot ────────────────────────────────────────────────────────── */
+.cover-slot{
+  position:relative;background:var(--bg3);border-radius:var(--r);
+  overflow:hidden;height:200px;border:2px dashed rgba(255,210,0,.12);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:border-color .2s;
+}
+.cover-slot:hover{border-color:rgba(255,210,0,.4);}
+.cover-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.cover-slot .cv-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:8px;
+  opacity:0;transition:opacity .2s;
+}
+.cover-slot:hover .cv-overlay,.cover-slot.empty .cv-overlay{opacity:1;}
+.cover-slot .cv-overlay span{font-size:28px;color:var(--y);}
+.cover-slot .cv-overlay p{font-size:10px;font-weight:600;letter-spacing:.25em;color:rgba(255,255,255,.6);}
+.cover-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.cover-slot .cv-del{
+  position:absolute;top:10px;right:10px;background:rgba(0,0,0,.8);
+  border:none;border-radius:3px;color:#fff;font-size:10px;padding:5px 9px;
+  cursor:pointer;z-index:2;opacity:0;transition:opacity .15s;
+}
+.cover-slot:hover .cv-del{opacity:1;}
+.cv-del:hover{background:var(--red)!important;}
+
+/* ─── Settings page ─────────────────────────────────────────────────────── */
+.setting-row{
+  display:flex;align-items:center;gap:16px;
+  padding:16px 0;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.setting-row:last-child{border-bottom:none;}
+.sr-info{flex:1;}
+.sr-info label{font-size:13px;font-weight:600;color:#fff;}
+.sr-info p{font-size:11px;color:var(--txt2);margin-top:2px;}
+/* Toggle switch */
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{
+  position:absolute;inset:0;background:rgba(255,255,255,.12);
+  border-radius:24px;cursor:pointer;transition:background .2s;
+}
+.toggle-slider:before{
+  content:'';position:absolute;left:3px;top:3px;
+  width:18px;height:18px;border-radius:50%;background:#fff;
+  transition:transform .2s;
+}
+.toggle input:checked + .toggle-slider{background:var(--y);}
+.toggle input:checked + .toggle-slider:before{transform:translateX(20px);}
+.pw-input{
+  background:var(--bg3);border:1px solid rgba(255,255,255,.1);border-radius:4px;
+  color:#fff;font-family:'Poppins',sans-serif;font-size:13px;
+  padding:9px 12px;outline:none;width:220px;transition:border-color .2s;
+}
+.pw-input:focus{border-color:rgba(255,210,0,.5);}
+.btn-sm{
+  background:rgba(255,210,0,.1);border:1px solid rgba(255,210,0,.2);
+  color:var(--y);font-family:'Poppins',sans-serif;font-size:9px;
+  font-weight:700;letter-spacing:.4em;text-transform:uppercase;
+  padding:9px 16px;border-radius:3px;cursor:pointer;transition:background .2s;
+}
+.btn-sm:hover{background:rgba(255,210,0,.2);}
+
+/* ─── Toast ─────────────────────────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:28px;right:28px;z-index:99999;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;
+}
+.toast-item{
+  background:var(--bg2);border:1px solid rgba(255,210,0,.25);
+  border-radius:var(--r);padding:12px 18px;
+  font-size:11px;font-weight:500;color:#fff;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  animation:toast-in .25s ease;max-width:300px;
+}
+.toast-item.err{border-color:rgba(255,60,60,.3);color:rgba(255,100,100,.9);}
+@keyframes toast-in{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ─── Progress bar overlay ──────────────────────────────────────────────── */
+#progress{
+  position:fixed;top:0;left:0;right:0;height:2px;
+  background:var(--y);z-index:99999;width:0;
+  transition:width .2s linear;pointer-events:none;display:none;
+}
+
+/* ─── Misc utils ─────────────────────────────────────────────────────────── */
+.row{display:flex;gap:16px;align-items:flex-start;}
+.col{flex:1;}
+hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:20px 0;}
+.label-tag{
+  font-size:8px;font-weight:700;letter-spacing:.45em;text-transform:uppercase;
+  color:rgba(255,210,0,.4);margin-bottom:8px;
+}
+.empty-state{text-align:center;padding:40px;color:var(--txt2);font-size:12px;}
+
+/* Grain canvas */
+canvas#g{position:fixed;inset:0;pointer-events:none;opacity:.03;z-index:0;}
+#app,#login-screen{position:relative;z-index:1;}
+</style>
+</head>
+<body>
+
+<!-- Grain -->
+<canvas id="g"></canvas>
+<div id="progress"></div>
+<div id="toast"></div>
+
+<!-- Login -->
+<div id="login-screen">
+  <div class="ls-logo">IA</div>
+  <div class="ls-sub">Admin Panel</div>
+  <form class="ls-form" id="ls-form">
+    <input type="password" id="ls-pw" placeholder="Admin Password" autocomplete="current-password">
+    <div class="ls-err" id="ls-err"></div>
+    <button type="submit" class="btn-primary">Sign In</button>
+  </form>
+</div>
+
+<!-- App -->
+<div id="app">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sb-logo">
+      <span>Ivan Amad</span>
+      <small>Admin Panel</small>
+    </div>
+    <div class="sb-section">Chapters</div>
+    <div id="sb-chapters"><!-- dynamically populated --></div>
+    <div class="sb-section">System</div>
+    <div class="sb-item" data-page="chapters"><span>◧</span> Add / Edit Chapters</div>
+    <div class="sb-item" data-page="settings"><span>⚙</span> Settings</div>
+    <div class="sb-spacer"></div>
+    <div class="sb-logout" id="logout-btn">↩ Logout</div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="tb-title">Select a chapter</div>
+        <div class="topbar-sub" id="tb-sub">Ivan Amad Portfolio</div>
+      </div>
+      <div class="topbar-spacer"></div>
+      <a href="/" target="_blank" class="badge">View Site ↗</a>
+    </div>
+
+    <!-- Chapter page (reused for all 7 chapters) -->
+    <div class="page active" id="page-chapter">
+      <div id="ch-content">
+        <div class="empty-state">← Select a chapter from the sidebar</div>
+      </div>
+    </div>
+
+    <!-- Chapters page -->
+    <div class="page" id="page-chapters">
+      <div id="ch-mgmt-content"><div class="empty-state">Loading…</div></div>
+    </div>
+
+    <!-- Settings page -->
+    <div class="page" id="page-settings">
+      <div class="card">
+        <div class="card-head"><h3>Site Password Protection</h3></div>
+        <div class="setting-row">
+          <div class="sr-info">
+            <label>Password Protect Site</label>
+            <p>Visitors must enter a password to view your portfolio</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="site-protected-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row" id="pw-row">
+          <div class="sr-info">
+            <label>Site Password</label>
+            <p>Visitors will need to enter this to access the site</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input type="text" class="pw-input" id="site-password-input" placeholder="Enter password">
+            <button class="btn-sm" id="save-settings-btn">Save</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head"><h3>Admin Password</h3></div>
+        <div class="setting-row">
+          <div class="sr-info">
+            <label>Change Admin Password</label>
+            <p>Run <code style="background:rgba(255,255,255,.07);padding:2px 6px;border-radius:3px;font-size:10px;">node setup.js</code> in your server folder to change the admin password.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Grain ────────────────────────────────────────────────────────────────────
+(()=>{
+  const c=document.getElementById('g');
+  const x=c.getContext('2d');
+  function sz(){c.width=innerWidth;c.height=innerHeight;}
+  function fr(){const d=x.createImageData(c.width,c.height);const b=new Uint32Array(d.data.buffer);for(let i=b.length;i--;){const v=Math.random()*200|0;b[i]=(255<<24)|(v<<16)|(v<<8)|v;}x.putImageData(d,0,0);setTimeout(()=>requestAnimationFrame(fr),55);}
+  sz();fr();addEventListener('resize',sz);
+})();
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let galleryData = {};
+let currentCat  = null;
+
+const CATS = {
+  'concept-art':  { label: 'Concept Art',   n: '01' },
+  'storyboards':  { label: 'Storyboards',   n: '02' },
+  'branding':     { label: 'Branding',      n: '03' },
+  'logos':        { label: 'Logos',         n: '04' },
+  'pixel-art':    { label: 'Pixel Art',     n: '05' },
+  'booth':        { label: 'Booth Design',  n: '06' },
+  'social':       { label: 'Social Media',  n: '07' },
+};
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+const prog = document.getElementById('progress');
+function showProgress(){ prog.style.display='block'; prog.style.width='0'; setTimeout(()=>prog.style.width='60%',20); }
+function endProgress(){ prog.style.width='100%'; setTimeout(()=>{ prog.style.display='none'; prog.style.width='0'; },400); }
+
+function toast(msg, err=false){
+  const el = document.createElement('div');
+  el.className = 'toast-item' + (err?' err':'');
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(()=>el.remove(), 3000);
+}
+
+async function api(method, url, body){
+  const opts = { method, headers: {} };
+  if (body instanceof FormData) {
+    opts.body = body;
+  } else if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const r = await fetch(url, opts);
+  return r.json();
+}
+
+async function loadGallery(){
+  const d = await api('GET', '/api/gallery');
+  galleryData = d;
+  return d;
+}
+
+// ─── Login ────────────────────────────────────────────────────────────────────
+async function checkAuth(){
+  const r = await api('GET', '/api/admin/check');
+  if (r.authed) showApp();
+}
+
+document.getElementById('ls-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw  = document.getElementById('ls-pw').value;
+  const err = document.getElementById('ls-err');
+  err.textContent = '';
+  const r = await api('POST', '/api/admin/login', { password: pw });
+  if (r.ok) {
+    showApp();
+  } else {
+    err.textContent = r.error || 'Wrong password';
+    document.getElementById('ls-pw').value = '';
+  }
+});
+
+async function showApp(){
+  document.getElementById('login-screen').classList.add('hidden');
+  showProgress();
+  await Promise.all([loadGallery(), loadChapters()]);
+  endProgress();
+  buildChapterSidebar();
+  document.getElementById('app').classList.add('ready');
+  loadSettings();
+}
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await api('POST', '/api/admin/logout');
+  location.reload();
+});
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function bindSidebarItems(){
+  document.querySelectorAll('.sb-item[data-page]').forEach(item => {
+    // Remove old handler if any
+    if (item._sbClick) item.removeEventListener('click', item._sbClick);
+    item._sbClick = () => {
+      document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+      item.classList.add('active');
+      const page = item.dataset.page;
+      if (page === 'settings') {
+        showPage('settings');
+      } else if (page === 'chapters') {
+        showPage('chapters');
+      } else {
+        currentCat = page;
+        showPage('chapter');
+        renderChapter(page);
+      }
+    };
+    item.addEventListener('click', item._sbClick);
+  });
+}
+
+function buildChapterSidebar(){
+  const container = document.getElementById('sb-chapters');
+  container.innerHTML = '';
+  const sorted = [...chaptersData].sort((a,b)=>(a.order||0)-(b.order||0));
+  sorted.forEach((ch, i) => {
+    const div = document.createElement('div');
+    div.className = 'sb-item';
+    div.dataset.page = ch.key;
+    div.innerHTML = '<span>◈</span> ' + ch.label + ' <span class="sb-num">' + String(i+1).padStart(2,'0') + '</span>';
+    container.appendChild(div);
+  });
+  bindSidebarItems();
+}
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  if (name === 'chapter') {
+    document.getElementById('page-chapter').classList.add('active');
+  } else if (name === 'settings') {
+    document.getElementById('page-settings').classList.add('active');
+    document.getElementById('tb-title').textContent = 'Settings';
+    document.getElementById('tb-sub').textContent = 'Site password and preferences';
+  } else if (name === 'chapters') {
+    document.getElementById('page-chapters').classList.add('active');
+    document.getElementById('tb-title').textContent = 'Chapters';
+    document.getElementById('tb-sub').textContent = 'Add, remove and rename chapters';
+    renderChaptersPage();
+  }
+}
+
+// ─── Chapter Renderer ─────────────────────────────────────────────────────────
+function renderChapter(cat){
+  // Use live chapters data first, fall back to hardcoded CATS
+  const chLive = chaptersData.find(c => c.key === cat || c.id === cat);
+  const sorted = [...chaptersData].sort((a,b)=>(a.order||0)-(b.order||0));
+  const chIdx  = sorted.findIndex(c => c.key === cat || c.id === cat);
+  const info   = chLive
+    ? { label: chLive.label, n: String(chIdx+1).padStart(2,'0') }
+    : (CATS[cat] || { label: cat, n: '??' });
+  document.getElementById('tb-title').textContent = info.label;
+  document.getElementById('tb-sub').textContent = `Chapter ${info.n}`;
+
+  const data = galleryData[cat] || { cover: null, strips: [], gallery:[] };
+  const container = document.getElementById('ch-content');
+  container.innerHTML = '';
+
+  // ── Cover ──
+  const coverCard = card(`Chapter Cover`, `Full-width background image displayed behind the chapter title`);
+  const coverWrap = document.createElement('div');
+  coverWrap.innerHTML = renderCoverSlot(data.cover, cat);
+  coverCard.appendChild(coverWrap);
+  container.appendChild(coverCard);
+  bindCoverSlot(coverWrap, cat, data.cover);
+
+  // ── Gallery Images ──
+  const gallCard = card('Gallery Images', `Individual artwork cards shown in the lightbox gallery (${data.gallery.length} uploaded)`);
+  const gallHead  = gallCard.querySelector('.card-head');
+
+  // Upload zone
+  const uz = uploadZone('gallery', cat, 'Click or drag images here', 'JPG, PNG, WEBP · up to 30MB each', true);
+  gallCard.appendChild(uz);
+
+  const gallGrid = document.createElement('div');
+  gallGrid.className = 'thumb-grid';
+  gallCard.appendChild(gallGrid);
+  renderGalleryGrid(gallGrid, data.gallery, cat);
+  container.appendChild(gallCard);
+
+  // ── Strip Images ──
+  const stripCard = card('Strip Images', `Horizontal scrolling film-strip row (${data.strips.length} uploaded)`);
+  const stripZone = uploadZone('strip', cat, 'Click or drag strip images here', 'JPG, PNG, WEBP · wide landscape crops work best', true);
+  stripCard.appendChild(stripZone);
+  const stripGrid = document.createElement('div');
+  stripGrid.className = 'thumb-grid';
+  stripCard.appendChild(stripGrid);
+  renderStripsGrid(stripGrid, data.strips, cat);
+  container.appendChild(stripCard);
+
+}  // end renderChapter
+
+function card(title, sub=''){
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.style.marginTop = '0';
+  const head = document.createElement('div');
+  head.className = 'card-head';
+  head.innerHTML = `<h3>${title}</h3><span class="ch-sub">${sub}</span>`;
+  div.appendChild(head);
+  return div;
+}
+
+// ─── Cover slot ───────────────────────────────────────────────────────────────
+function renderCoverSlot(src, cat){
+  return `
+    <div class="cover-slot ${src ? '' : 'empty'}" id="cover-slot-${cat}">
+      ${src ? `<img src="${src}" alt="Cover">` : ''}
+      <div class="cv-overlay">
+        <span>+</span>
+        <p>${src ? 'Replace Cover' : 'Upload Cover'}</p>
+      </div>
+      ${src ? `<button class="cv-del" data-cat="${cat}" title="Remove cover">✕</button>` : ''}
+      <input type="file" accept="image/*" id="cover-input-${cat}">
+    </div>`;
+}
+
+function bindCoverSlot(wrap, cat, hasCover){
+  const input = wrap.querySelector(`#cover-input-${cat}`);
+  if (input) {
+    input.addEventListener('change', () => {
+      if (input.files[0]) uploadFile(cat, 'cover', null, input.files[0]);
+    });
+  }
+  const delBtn = wrap.querySelector('.cv-del');
+  if (delBtn) {
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      deleteImage(cat, 'cover', null);
+    });
+  }
+}
+
+// ─── Upload Zone ──────────────────────────────────────────────────────────────
+function uploadZone(slot, cat, label='Upload', sub='', multiple=false){
+  const div = document.createElement('div');
+  div.className = 'upzone';
+  div.innerHTML = `
+    <div class="uz-icon">⊕</div>
+    <div class="uz-label">${label}</div>
+    <div class="uz-sub">${sub}</div>
+    <input type="file" accept="image/*" ${multiple?'multiple':''}>`;
+
+  const input = div.querySelector('input');
+  input.addEventListener('change', async () => {
+    const files = [...input.files];
+    for (const f of files) await uploadFile(cat, slot, null, f);
+    input.value = '';
+  });
+  div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('drag-over'); });
+  div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+  div.addEventListener('drop', async e => {
+    e.preventDefault();
+    div.classList.remove('drag-over');
+    const files = [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'));
+    for (const f of files) await uploadFile(cat, slot, null, f);
+  });
+  return div;
+}
+
+// ─── Gallery grid (with label edit + reorder) ─────────────────────────────────
+function renderGalleryGrid(container, gallery, cat){
+  container.innerHTML = '';
+  if (!gallery.length) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:20px">No images yet — upload above</div>';
+    return;
+  }
+  gallery.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'thumb';
+    div.style.cssText = 'position:relative;background:var(--bg3);border-radius:4px;overflow:visible;aspect-ratio:1;border:1px solid rgba(255,255,255,.06);';
+    div.innerHTML =
+      '<div style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:4px;">' +
+        '<img src="'+item.src+'" alt="'+item.label+'" style="width:100%;height:100%;object-fit:cover;display:block;">' +
+        '<button class="thumb-del" title="Delete" style="z-index:2;">✕</button>' +
+      '</div>' +
+      '<div class="thumb-label-row" style="display:flex;align-items:center;gap:4px;padding:4px 4px 0;position:relative;">' +
+        '<span class="lbl-text" style="flex:1;font-size:9px;color:rgba(255,255,255,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;" title="Click to edit label">'+item.label+'</span>' +
+        '<button class="btn-edit-label" title="Edit label" style="background:none;border:none;color:rgba(255,210,0,.5);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;">✎</button>' +
+        '<button class="btn-move-up" title="Move up" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;"'+(i===0?' disabled style="opacity:.15;"':'')+'>↑</button>' +
+        '<button class="btn-move-down" title="Move down" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;"'+(i===gallery.length-1?' disabled style="opacity:.15;"':'')+'>↓</button>' +
+      '</div>';
+
+    // Delete
+    div.querySelector('.thumb-del').addEventListener('click', () => deleteImage(cat, 'gallery', i));
+
+    // Edit label
+    function startEdit(){
+      const row = div.querySelector('.thumb-label-row');
+      const oldLabel = gallery[i].label;
+      row.innerHTML =
+        '<input type="text" value="'+oldLabel+'" style="flex:1;background:var(--bg3);border:1px solid rgba(255,210,0,.4);border-radius:3px;color:#fff;font-size:9px;padding:2px 5px;font-family:Poppins,sans-serif;min-width:0;">' +
+        '<button class="btn-save-label" style="background:rgba(255,210,0,.15);border:1px solid rgba(255,210,0,.3);border-radius:3px;color:var(--y);font-size:8px;padding:2px 5px;cursor:pointer;">✓</button>' +
+        '<button class="btn-cancel-label" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;">✕</button>';
+      const inp = row.querySelector('input');
+      inp.focus(); inp.select();
+      row.querySelector('.btn-save-label').addEventListener('click', () => saveLabel(i, inp.value.trim() || oldLabel));
+      row.querySelector('.btn-cancel-label').addEventListener('click', () => renderChapter(cat));
+      inp.addEventListener('keydown', e => { if(e.key==='Enter') saveLabel(i, inp.value.trim() || oldLabel); if(e.key==='Escape') renderChapter(cat); });
+    }
+    async function saveLabel(idx, newLabel){
+      const r = await api('PATCH', '/api/admin/gallery-label', { category: cat, index: idx, label: newLabel });
+      if (r.ok){ galleryData[cat] = r.category; toast('Label updated'); renderChapter(cat); }
+      else toast(r.error || 'Update failed', true);
+    }
+    div.querySelector('.btn-edit-label').addEventListener('click', startEdit);
+    div.querySelector('.lbl-text').addEventListener('click', startEdit);
+
+    // Reorder
+    const upBtn = div.querySelector('.btn-move-up');
+    const downBtn = div.querySelector('.btn-move-down');
+    if (upBtn && !upBtn.disabled) upBtn.addEventListener('click', () => reorderImage(cat, i, i-1));
+    if (downBtn && !downBtn.disabled) downBtn.addEventListener('click', () => reorderImage(cat, i, i+1));
+
+    container.appendChild(div);
+  });
+}
+
+async function reorderImage(cat, fromIndex, toIndex){
+  showProgress();
+  try {
+    const r = await api('POST', '/api/admin/reorder', { category: cat, fromIndex, toIndex });
+    if (r.ok){ galleryData[cat] = r.category; renderChapter(cat); }
+    else toast(r.error || 'Reorder failed', true);
+  } catch(e){ toast('Reorder error: '+e.message, true); }
+  endProgress();
+}
+
+function renderStripsGrid(container, strips, cat){
+  container.innerHTML = '';
+  if (!strips.length) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:20px">No strip images yet</div>';
+    return;
+  }
+  strips.forEach((src, i) => {
+    const div = document.createElement('div');
+    div.className = 'thumb';
+    div.innerHTML = `
+      <img src="${src}" alt="Strip ${i+1}">
+      <button class="thumb-del" title="Delete">✕</button>
+      <div class="thumb-label">Strip ${i+1}</div>`;
+    div.querySelector('.thumb-del').addEventListener('click', () => deleteImage(cat, 'strip', i));
+    container.appendChild(div);
+  });
+}
+
+
+// ─── Upload ───────────────────────────────────────────────────────────────────
+async function uploadFile(cat, slot, index, file){
+  showProgress();
+  try {
+    const fd = new FormData();
+    fd.append('image', file);
+    fd.append('category', cat);
+    fd.append('slot', slot);
+    if (index !== null && index !== undefined) fd.append('index', index);
+    fd.append('label', file.name.replace(/\.[^.]+$/, ''));
+
+    const r = await api('POST', '/api/admin/upload', fd);
+    if (r.ok) {
+      galleryData[cat] = r.category;
+      toast(`Uploaded: ${file.name}`);
+      renderChapter(cat);
+    } else {
+      toast(r.error || 'Upload failed', true);
+    }
+  } catch(e) {
+    toast('Upload error: ' + e.message, true);
+  }
+  endProgress();
+}
+
+// ─── Delete ───────────────────────────────────────────────────────────────────
+async function deleteImage(cat, slot, index){
+  if (!confirm('Delete this image?')) return;
+  showProgress();
+  try {
+    const r = await api('DELETE', '/api/admin/image', { category: cat, slot, index });
+    if (r.ok) {
+      galleryData[cat] = r.category;
+      toast('Deleted');
+      renderChapter(cat);
+    } else {
+      toast(r.error || 'Delete failed', true);
+    }
+  } catch(e) {
+    toast('Delete error: ' + e.message, true);
+  }
+  endProgress();
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+async function loadSettings(){
+  try {
+    const s = await api('GET', '/api/admin/settings');
+    document.getElementById('site-protected-toggle').checked = s.siteProtected;
+    document.getElementById('site-password-input').value     = s.sitePassword || '';
+    document.getElementById('pw-row').style.display = s.siteProtected ? '' : 'none';
+  } catch(e) {}
+}
+
+document.getElementById('site-protected-toggle').addEventListener('change', function(){
+  document.getElementById('pw-row').style.display = this.checked ? '' : 'none';
+});
+
+document.getElementById('save-settings-btn').addEventListener('click', async () => {
+  const siteProtected = document.getElementById('site-protected-toggle').checked;
+  const sitePassword  = document.getElementById('site-password-input').value;
+  const r = await api('POST', '/api/admin/settings', { siteProtected, sitePassword });
+  if (r.ok) toast('Settings saved');
+  else toast(r.error || 'Save failed', true);
+});
+
+// ─── Chapters Management ──────────────────────────────────────────────────────
+let chaptersData = [];
+const CARD_CLASSES = ['wide','tall','sq','sq-sm','pano','port'];
+
+async function loadChapters(){
+  const r = await api('GET','/api/chapters');
+  chaptersData = Array.isArray(r) ? r : [];
+  return chaptersData;
+}
+
+async function saveChapters(){
+  const r = await api('POST','/api/chapters', chaptersData);
+  if(r.ok){
+    toast('Chapters saved');
+    buildChapterSidebar(); // refresh sidebar labels/order
+  } else toast(r.error||'Save failed',true);
+}
+
+function slugify(s){
+  return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+
+function renderChaptersPage(){
+  const container = document.getElementById('ch-mgmt-content');
+  container.innerHTML = '';
+
+  // Add chapter button
+  const addCard = document.createElement('div');
+  addCard.className = 'card';
+  addCard.style.marginBottom = '16px';
+  addCard.innerHTML =
+    '<div class="card-head"><h3>Chapter List</h3><span class="ch-sub">Drag to reorder · toggle to show/hide · click name to edit</span>'+
+    '<div class="ch-spacer"></div>'+
+    '<button class="btn-sm" id="add-ch-btn">+ Add Chapter</button></div>'+
+    '<div id="chapters-list" style="display:flex;flex-direction:column;gap:8px;"></div>';
+  container.appendChild(addCard);
+
+  addCard.querySelector('#add-ch-btn').addEventListener('click', function(){
+    const newCh = {
+      id: 'chapter-'+Date.now(),
+      key: 'custom-'+Date.now(),
+      label: 'New Chapter',
+      titleMain: 'New',
+      titleOutline: 'Chapter',
+      desc: 'Description of this chapter.',
+      cardClass: 'wide',
+      color: [200,200,200],
+      order: chaptersData.length,
+      enabled: true
+    };
+    chaptersData.push(newCh);
+    saveChapters().then(function(){ renderChaptersPage(); });
+  });
+
+  const list = addCard.querySelector('#chapters-list');
+  const sorted = [...chaptersData].sort(function(a,b){ return a.order-b.order; });
+
+  sorted.forEach(function(ch, listIdx){
+    const row = document.createElement('div');
+    row.className = 'card';
+    row.style.cssText = 'padding:14px 16px;margin-top:0;display:flex;align-items:flex-start;gap:12px;';
+    row.setAttribute('data-id', ch.id);
+
+    row.innerHTML =
+      // enable toggle
+      '<label class="toggle" style="flex-shrink:0;margin-top:2px"><input type="checkbox" class="ch-enabled"'+(ch.enabled?' checked':'')+'><span class="toggle-slider"></span></label>'+
+      // info block
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+          '<span class="ch-list-label" style="font-size:13px;font-weight:700;color:#fff;cursor:pointer;">'+ch.label+'</span>'+
+          '<span style="font-size:9px;color:rgba(255,210,0,.35);letter-spacing:.3em;">'+ch.id+'</span>'+
+        '</div>'+
+        '<div class="ch-edit-form" style="display:none;margin-top:10px;">'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
+            '<div><div class="label-tag">Label (nav name)</div><input class="pw-input" data-f="label" value="'+ch.label+'" style="width:100%;font-size:12px;padding:6px 8px;"></div>'+
+            '<div><div class="label-tag">Title Main Word</div><input class="pw-input" data-f="titleMain" value="'+(ch.titleMain||ch.label)+'" style="width:100%;font-size:12px;padding:6px 8px;"></div>'+
+            '<div><div class="label-tag">Title Outline Word</div><input class="pw-input" data-f="titleOutline" value="'+(ch.titleOutline||'')+'" style="width:100%;font-size:12px;padding:6px 8px;"></div>'+
+            '<div><div class="label-tag">Gallery Key (internal)</div><input class="pw-input" data-f="key" value="'+ch.key+'" style="width:100%;font-size:12px;padding:6px 8px;"></div>'+
+          '</div>'+
+          '<div style="margin-bottom:8px;"><div class="label-tag">Description</div><input class="pw-input" data-f="desc" value="'+ch.desc+'" style="width:100%;font-size:12px;padding:6px 8px;"></div>'+
+          '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'+
+            '<div class="label-tag" style="margin:0">Card Size:</div>'+
+            '<select class="pw-input" data-f="cardClass" style="padding:6px 8px;font-size:12px;width:auto;">'+
+              CARD_CLASSES.map(function(c){ return '<option value="'+c+'"'+(ch.cardClass===c?' selected':'')+'>'+c+'</option>'; }).join('')+
+            '</select>'+
+            '<div class="label-tag" style="margin:0;margin-left:8px">Color R,G,B:</div>'+
+            '<input class="pw-input" data-f="colorStr" value="'+(ch.color||[200,200,200]).join(',')+'" placeholder="210,100,60" style="width:110px;font-size:12px;padding:6px 8px;">'+
+          '</div>'+
+          '<div style="display:flex;gap:8px;">'+
+            '<button class="btn-sm ch-save-btn">Save</button>'+
+            '<button class="btn-sm ch-cancel-btn" style="background:rgba(255,60,60,.1);border-color:rgba(255,60,60,.2);color:rgba(255,100,100,.8);">Cancel</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      // reorder + delete
+      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'+
+        '<button class="btn-sm ch-up" style="padding:4px 8px;"'+(listIdx===0?' disabled':'')+'">↑</button>'+
+        '<button class="btn-sm ch-down" style="padding:4px 8px;"'+(listIdx===sorted.length-1?' disabled':'')+'">↓</button>'+
+        '<button class="btn-sm ch-del-btn" style="background:rgba(255,60,60,.08);border-color:rgba(255,60,60,.2);color:rgba(255,100,100,.7);padding:4px 8px;margin-top:4px;">✕</button>'+
+      '</div>';
+
+    // Toggle enabled
+    row.querySelector('.ch-enabled').addEventListener('change', function(){
+      ch.enabled = this.checked;
+      saveChapters();
+    });
+
+    // Click label to expand edit form
+    row.querySelector('.ch-list-label').addEventListener('click', function(){
+      const form = row.querySelector('.ch-edit-form');
+      form.style.display = form.style.display==='none' ? '' : 'none';
+    });
+
+    // Save edits
+    row.querySelector('.ch-save-btn').addEventListener('click', function(){
+      row.querySelectorAll('[data-f]').forEach(function(inp){
+        const f = inp.getAttribute('data-f');
+        if(f==='colorStr'){
+          ch.color = inp.value.split(',').map(function(n){ return parseInt(n)||0; });
+        } else {
+          ch[f] = inp.value.trim();
+        }
+      });
+      row.querySelector('.ch-edit-form').style.display='none';
+      row.querySelector('.ch-list-label').textContent = ch.label;
+      saveChapters();
+    });
+
+    row.querySelector('.ch-cancel-btn').addEventListener('click', function(){
+      row.querySelector('.ch-edit-form').style.display='none';
+    });
+
+    // Reorder
+    const realIdx = chaptersData.findIndex(function(c){ return c.id===ch.id; });
+    const upBtn = row.querySelector('.ch-up');
+    const downBtn = row.querySelector('.ch-down');
+    if(upBtn && listIdx>0) upBtn.addEventListener('click', function(){
+      const prev = sorted[listIdx-1];
+      const prevIdx = chaptersData.findIndex(function(c){ return c.id===prev.id; });
+      chaptersData[realIdx].order = listIdx-1;
+      chaptersData[prevIdx].order = listIdx;
+      saveChapters().then(function(){ renderChaptersPage(); });
+    });
+    if(downBtn && listIdx<sorted.length-1) downBtn.addEventListener('click', function(){
+      const next = sorted[listIdx+1];
+      const nextIdx = chaptersData.findIndex(function(c){ return c.id===next.id; });
+      chaptersData[realIdx].order = listIdx+1;
+      chaptersData[nextIdx].order = listIdx;
+      saveChapters().then(function(){ renderChaptersPage(); });
+    });
+
+    // Delete
+    row.querySelector('.ch-del-btn').addEventListener('click', function(){
+      if(!confirm('Delete chapter "'+ch.label+'"? Images will remain but chapter disappears from the portfolio.')) return;
+      chaptersData = chaptersData.filter(function(c){ return c.id!==ch.id; });
+      saveChapters().then(function(){ renderChaptersPage(); });
+    });
+
+    list.appendChild(row);
+  });
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+// Bind static sidebar items (chapters + settings) immediately at load
+bindSidebarItems();
+checkAuth();
+</script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       

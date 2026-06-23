@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ivan Amad — Enter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;600;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:#0a0900;color:#FFD600;font-family:'Poppins',sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.wrap{text-align:center;display:flex;flex-direction:column;align-items:center;gap:32px;}
+.logo{font-size:clamp(48px,10vw,96px);font-weight:900;letter-spacing:-.04em;color:#FFD600;text-shadow:0 2px 0 #F0C800,0 4px 0 #D4A800,0 6px 4px rgba(0,0,0,.5);}
+.sub{font-size:10px;font-weight:600;letter-spacing:.6em;text-transform:uppercase;color:rgba(255,210,0,.35);margin-top:-24px;}
+form{display:flex;flex-direction:column;align-items:center;gap:16px;width:280px;}
+input[type=password]{
+  width:100%;
+  background:transparent;
+  border:none;
+  border-bottom:1px solid rgba(255,210,0,.3);
+  color:#FFD600;
+  font-family:'Poppins',sans-serif;
+  font-size:14px;
+  font-weight:400;
+  letter-spacing:.15em;
+  padding:12px 0;
+  outline:none;
+  text-align:center;
+  transition:border-color .3s;
+}
+input[type=password]::placeholder{color:rgba(255,210,0,.25);letter-spacing:.3em;}
+input[type=password]:focus{border-bottom-color:rgba(255,210,0,.8);}
+button{
+  background:#FFD600;
+  color:#0a0900;
+  border:none;
+  font-family:'Poppins',sans-serif;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.5em;
+  text-transform:uppercase;
+  padding:14px 36px;
+  cursor:pointer;
+  transition:opacity .2s;
+}
+button:hover{opacity:.8;}
+.err{font-size:10px;letter-spacing:.25em;color:rgba(255,80,80,.8);min-height:16px;}
+/* Grain */
+canvas{position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:0;}
+.wrap{position:relative;z-index:1;}
+</style>
+</head>
+<body>
+<canvas id="grain"></canvas>
+<div class="wrap">
+  <div class="logo">IA</div>
+  <div class="sub">Private Access</div>
+  <form id="frm">
+    <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+    <div class="err" id="err"></div>
+    <button type="submit">Enter</button>
+  </form>
+</div>
+<script>
+// Grain
+(()=>{
+  const c=document.getElementById('grain');
+  const x=c.getContext('2d');
+  function sz(){c.width=innerWidth;c.height=innerHeight;}
+  function fr(){const d=x.createImageData(c.width,c.height);const b=new Uint32Array(d.data.buffer);for(let i=b.length;i--;){const v=Math.random()*200|0;b[i]=(255<<24)|(v<<16)|(v<<8)|v;}x.putImageData(d,0,0);setTimeout(()=>requestAnimationFrame(fr),55);}
+  sz();fr();addEventListener('resize',sz);
+})();
+
+document.getElementById('frm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = document.getElementById('pw').value;
+  const err = document.getElementById('err');
+  err.textContent = '';
+  try {
+    const r = await fetch('/api/site-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      window.location.href = '/';
+    } else {
+      err.textContent = 'Wrong password';
+      document.getElementById('pw').value = '';
+    }
+  } catch(e) {
+    err.textContent = 'Connection error';
+  }
+});
+</script>
+</body>
+</html>
