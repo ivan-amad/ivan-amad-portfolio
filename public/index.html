@@ -451,32 +451,25 @@ body.light.ch #cur-r{border-color:rgba(0,0,0,.6)}
 .ch-gallery-title{font-size:11px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--white)}
 .ch-gallery-count{font-size:10px;font-weight:300;letter-spacing:.2em;color:var(--g5)}
 
-/* gallery horizontal scroll */
-.ch-gal{display:flex;gap:3px;overflow:hidden}
-.ch-gal-track{display:flex;gap:3px;transition:transform .7s var(--ease)}
-.gal-card{flex:0 0 auto;position:relative;overflow:hidden;background:var(--g3);cursor:none}
-.gal-card.w{width:clamp(200px,28vw,380px);height:clamp(150px,20vw,280px)}
-.gal-card.t{width:clamp(130px,15vw,200px);height:clamp(200px,26vw,360px)}
-.gal-card.s{width:clamp(160px,18vw,240px);height:clamp(160px,18vw,240px)}
-.gal-card.p{width:clamp(110px,12vw,160px);height:clamp(180px,22vw,300px)}
-.gal-card::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:24px 24px;z-index:0}
-.gal-card-inner{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:background .4s}
-.gal-card:hover .gal-card-inner{background:rgba(255,255,255,.05)}
-.gal-num{font-size:clamp(36px,5vw,60px);font-weight:900;color:rgba(255,255,255,.05);letter-spacing:-.04em;line-height:1}
-.gal-cat{font-size:8px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--g5)}
-.gal-hover{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.65);display:flex;flex-direction:column;justify-content:flex-end;padding:14px 16px;opacity:0;transition:opacity .35s var(--ease)}
+/* gallery square grid */
+.ch-gal{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.ch-gal-track{display:contents}
+.gal-card{position:relative;overflow:hidden;background:var(--g2);cursor:none;aspect-ratio:1/1}
+.gal-card::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:20px 20px;z-index:1;pointer-events:none}
+.gal-card img.dyn-img{transition:transform .55s var(--ease)}
+.gal-card:hover img.dyn-img{transform:scale(1.06)}
+.gal-card-inner{position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.gal-num{font-size:clamp(28px,4vw,48px);font-weight:900;color:rgba(255,255,255,.06);letter-spacing:-.04em;line-height:1}
+.gal-cat{font-size:8px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--g4)}
+.gal-hover{position:absolute;inset:0;z-index:3;background:linear-gradient(to top,rgba(0,0,0,.82) 0%,rgba(0,0,0,.2) 60%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px 18px 18px;opacity:0;transition:opacity .35s var(--ease)}
 .gal-card:hover .gal-hover{opacity:1}
-.gal-hover-label{font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--white)}
-
-/* gallery nav */
-.gal-controls{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid var(--g3);margin-top:3px}
-.gal-nav{display:flex;gap:8px}
-.gal-btn{width:40px;height:40px;border:1px solid var(--g4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;transition:.3s}
-.gal-btn:hover{background:var(--white);border-color:var(--white);color:var(--black)}
-.gal-ctr{font-size:10px;font-weight:300;letter-spacing:.2em;color:var(--g5)}
-.gal-dots{display:flex;gap:5px;align-items:center}
-.gal-dot{width:4px;height:4px;background:var(--g4);transition:.3s}
-.gal-dot.on{background:var(--white);width:14px}
+.gal-hover-label{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--white)}
+.gal-hover-idx{font-size:8px;font-weight:300;letter-spacing:.15em;color:var(--g5);margin-bottom:4px}
+.gal-card::before{content:'';position:absolute;inset:10px;border:1px solid rgba(255,255,255,0);transition:border-color .3s;z-index:4;pointer-events:none}
+.gal-card:hover::before{border-color:rgba(255,255,255,.18)}
+.gal-controls{display:none}
+@media(max-width:860px){.ch-gal{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.ch-gal{grid-template-columns:repeat(2,1fr)}}
 
 /* CHAPTER OUTRO */
 .ch-outro{padding:clamp(48px,7vh,80px) clamp(20px,7vw,100px);border-top:1px solid var(--g3);display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap}
