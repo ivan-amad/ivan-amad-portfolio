@@ -535,6 +535,23 @@ function renderChapter(cat){
   const gallCard = card('Gallery Images', `Individual artwork cards shown in the lightbox gallery (${data.gallery.length} uploaded)`);
   const gallHead  = gallCard.querySelector('.card-head');
 
+  // Select-mode toggle button
+  if (data.gallery.length > 0) {
+    const selBtn = document.createElement('button');
+    selBtn.id = 'gal-sel-btn';
+    selBtn.innerHTML = _galSelMode ? '✕ Cancel' : '☑ Select';
+    selBtn.style.cssText = 'margin-left:auto;background:transparent;border:1px solid rgba(255,210,0,.35);color:rgba(255,210,0,.7);font-family:Poppins,sans-serif;font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;padding:5px 12px;cursor:pointer;border-radius:3px;flex-shrink:0;';
+    selBtn.addEventListener('click', () => {
+      _galSelMode = !_galSelMode;
+      _galSelected.clear();
+      renderChapter(cat);
+      updateSelBar(cat);
+    });
+    gallHead.style.display = 'flex';
+    gallHead.style.alignItems = 'center';
+    gallHead.appendChild(selBtn);
+  }
+
   // Upload zone
   const uz = uploadZone('gallery', cat, 'Click or drag images here', 'JPG, PNG, WEBP · up to 30MB each', true);
   gallCard.appendChild(uz);
@@ -625,7 +642,37 @@ function uploadZone(slot, cat, label='Upload', sub='', multiple=false){
   return div;
 }
 
-// ─── Gallery grid (with label edit + reorder) ─────────────────────────────────
+// ─── Selection state ──────────────────────────────────────────────────────────
+let _galSelMode = false;
+let _galSelected = new Set();
+
+function updateSelBar(cat){
+  let bar = document.getElementById('gal-sel-bar');
+  if (!_galSelMode) { if (bar) bar.style.display = 'none'; return; }
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'gal-sel-bar';
+    bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9000;background:#1a1810;border:1px solid rgba(255,210,0,.35);border-radius:8px;padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.6);min-width:320px;';
+    document.body.appendChild(bar);
+  }
+  const n = _galSelected.size;
+  const data = galleryData[cat] || { gallery: [] };
+  const total = data.gallery.length;
+  bar.style.display = 'flex';
+  bar.innerHTML =
+    '<span style="font-size:12px;font-weight:600;color:var(--y);flex:1;">' + n + ' of ' + total + ' selected</span>' +
+    '<button id="gal-sel-all" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-family:Poppins,sans-serif;font-size:8px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;padding:6px 12px;cursor:pointer;border-radius:4px;">' + (n === total ? 'Deselect All' : 'Select All') + '</button>' +
+    '<button id="gal-sel-del" style="background:var(--red);border:none;color:#fff;font-family:Poppins,sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:6px 14px;cursor:pointer;border-radius:4px;opacity:' + (n > 0 ? '1' : '.4') + ';" ' + (n === 0 ? 'disabled' : '') + '>Delete ' + (n > 0 ? n : '') + ' Selected</button>';
+  document.getElementById('gal-sel-all').addEventListener('click', () => {
+    if (_galSelected.size === total) _galSelected.clear();
+    else for (let j = 0; j < total; j++) _galSelected.add(j);
+    renderGalleryGrid(document.querySelector('.thumb-grid'), data.gallery, cat);
+    updateSelBar(cat);
+  });
+  document.getElementById('gal-sel-del').addEventListener('click', () => bulkDeleteGallery(cat));
+}
+
+// ─── Gallery grid (with label edit + reorder + multi-select) ─────────────────
 function renderGalleryGrid(container, gallery, cat){
   container.innerHTML = '';
   if (!gallery.length) {
@@ -635,52 +682,100 @@ function renderGalleryGrid(container, gallery, cat){
   gallery.forEach((item, i) => {
     const div = document.createElement('div');
     div.className = 'thumb';
-    div.style.cssText = 'position:relative;background:var(--bg3);border-radius:4px;overflow:visible;aspect-ratio:1;border:1px solid rgba(255,255,255,.06);';
-    div.innerHTML =
-      '<div style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:4px;">' +
-        '<img src="'+item.src+'" alt="'+item.label+'" style="width:100%;height:100%;object-fit:cover;display:block;">' +
-        '<button class="thumb-del" title="Delete" style="z-index:2;">✕</button>' +
-      '</div>' +
-      '<div class="thumb-label-row" style="display:flex;align-items:center;gap:4px;padding:4px 4px 0;position:relative;">' +
-        '<span class="lbl-text" style="flex:1;font-size:9px;color:rgba(255,255,255,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;" title="Click to edit label">'+item.label+'</span>' +
-        '<button class="btn-edit-label" title="Edit label" style="background:none;border:none;color:rgba(255,210,0,.5);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;">✎</button>' +
-        '<button class="btn-move-up" title="Move up" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;"'+(i===0?' disabled style="opacity:.15;"':'')+'>↑</button>' +
-        '<button class="btn-move-down" title="Move down" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;"'+(i===gallery.length-1?' disabled style="opacity:.15;"':'')+'>↓</button>' +
-      '</div>';
+    const isSelected = _galSelected.has(i);
+    div.style.cssText = 'position:relative;background:var(--bg3);border-radius:4px;overflow:visible;aspect-ratio:1;border:2px solid ' + (isSelected ? 'var(--y)' : 'rgba(255,255,255,.06)') + ';transition:border-color .15s;';
 
-    // Delete
-    div.querySelector('.thumb-del').addEventListener('click', () => deleteImage(cat, 'gallery', i));
+    if (_galSelMode) {
+      // ── Select mode card ──
+      div.style.cursor = 'pointer';
+      div.innerHTML =
+        '<div style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:3px;">' +
+          '<img src="'+item.src+'" alt="'+item.label+'" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity .15s;opacity:' + (isSelected ? '1' : '.8') + '">' +
+          '<div class="sel-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,' + (isSelected ? '.35' : '0') + ');transition:background .15s;"></div>' +
+          '<div class="sel-check" style="position:absolute;top:8px;left:8px;width:22px;height:22px;border-radius:50%;border:2px solid ' + (isSelected ? 'var(--y)' : 'rgba(255,255,255,.6)') + ';background:' + (isSelected ? 'var(--y)' : 'rgba(0,0,0,.4)') + ';display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--bg);font-weight:900;transition:.15s;">' + (isSelected ? '✓' : '') + '</div>' +
+        '</div>' +
+        '<div style="padding:4px 4px 2px;font-size:9px;color:rgba(255,255,255,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+item.label+'</div>';
+      div.addEventListener('click', () => {
+        if (_galSelected.has(i)) _galSelected.delete(i);
+        else _galSelected.add(i);
+        // Update just this card visually
+        const sel = _galSelected.has(i);
+        div.style.borderColor = sel ? 'var(--y)' : 'rgba(255,255,255,.06)';
+        div.querySelector('img').style.opacity = sel ? '1' : '.8';
+        div.querySelector('.sel-overlay').style.background = sel ? 'rgba(0,0,0,.35)' : 'rgba(0,0,0,0)';
+        const chk = div.querySelector('.sel-check');
+        chk.style.borderColor = sel ? 'var(--y)' : 'rgba(255,255,255,.6)';
+        chk.style.background  = sel ? 'var(--y)' : 'rgba(0,0,0,.4)';
+        chk.textContent = sel ? '✓' : '';
+        updateSelBar(cat);
+      });
+    } else {
+      // ── Normal mode card ──
+      div.innerHTML =
+        '<div style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:4px;">' +
+          '<img src="'+item.src+'" alt="'+item.label+'" style="width:100%;height:100%;object-fit:cover;display:block;">' +
+          '<button class="thumb-del" title="Delete" style="z-index:2;">✕</button>' +
+        '</div>' +
+        '<div class="thumb-label-row" style="display:flex;align-items:center;gap:4px;padding:4px 4px 0;position:relative;">' +
+          '<span class="lbl-text" style="flex:1;font-size:9px;color:rgba(255,255,255,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;" title="Click to edit label">'+item.label+'</span>' +
+          '<button class="btn-edit-label" title="Edit label" style="background:none;border:none;color:rgba(255,210,0,.5);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;">✎</button>' +
+          '<button class="btn-move-up" title="Move up" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;"'+(i===0?' disabled style="opacity:.15;"':'')+'>↑</button>' +
+          '<button class="btn-move-down" title="Move down" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;flex-shrink:0;"'+(i===gallery.length-1?' disabled style="opacity:.15;"':'')+'>↓</button>' +
+        '</div>';
 
-    // Edit label
-    function startEdit(){
-      const row = div.querySelector('.thumb-label-row');
-      const oldLabel = gallery[i].label;
-      row.innerHTML =
-        '<input type="text" value="'+oldLabel+'" style="flex:1;background:var(--bg3);border:1px solid rgba(255,210,0,.4);border-radius:3px;color:#fff;font-size:9px;padding:2px 5px;font-family:Poppins,sans-serif;min-width:0;">' +
-        '<button class="btn-save-label" style="background:rgba(255,210,0,.15);border:1px solid rgba(255,210,0,.3);border-radius:3px;color:var(--y);font-size:8px;padding:2px 5px;cursor:pointer;">✓</button>' +
-        '<button class="btn-cancel-label" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;">✕</button>';
-      const inp = row.querySelector('input');
-      inp.focus(); inp.select();
-      row.querySelector('.btn-save-label').addEventListener('click', () => saveLabel(i, inp.value.trim() || oldLabel));
-      row.querySelector('.btn-cancel-label').addEventListener('click', () => renderChapter(cat));
-      inp.addEventListener('keydown', e => { if(e.key==='Enter') saveLabel(i, inp.value.trim() || oldLabel); if(e.key==='Escape') renderChapter(cat); });
+      div.querySelector('.thumb-del').addEventListener('click', () => deleteImage(cat, 'gallery', i));
+
+      function startEdit(){
+        const row = div.querySelector('.thumb-label-row');
+        const oldLabel = gallery[i].label;
+        row.innerHTML =
+          '<input type="text" value="'+oldLabel+'" style="flex:1;background:var(--bg3);border:1px solid rgba(255,210,0,.4);border-radius:3px;color:#fff;font-size:9px;padding:2px 5px;font-family:Poppins,sans-serif;min-width:0;">' +
+          '<button class="btn-save-label" style="background:rgba(255,210,0,.15);border:1px solid rgba(255,210,0,.3);border-radius:3px;color:var(--y);font-size:8px;padding:2px 5px;cursor:pointer;">✓</button>' +
+          '<button class="btn-cancel-label" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:10px;cursor:pointer;padding:0 2px;">✕</button>';
+        const inp = row.querySelector('input');
+        inp.focus(); inp.select();
+        row.querySelector('.btn-save-label').addEventListener('click', () => saveLabel(i, inp.value.trim() || oldLabel));
+        row.querySelector('.btn-cancel-label').addEventListener('click', () => renderChapter(cat));
+        inp.addEventListener('keydown', e => { if(e.key==='Enter') saveLabel(i, inp.value.trim() || oldLabel); if(e.key==='Escape') renderChapter(cat); });
+      }
+      async function saveLabel(idx, newLabel){
+        const r = await api('PATCH', '/api/admin/gallery-label', { category: cat, index: idx, label: newLabel });
+        if (r.ok){ galleryData[cat] = r.category; toast('Label updated'); renderChapter(cat); }
+        else toast(r.error || 'Update failed', true);
+      }
+      div.querySelector('.btn-edit-label').addEventListener('click', startEdit);
+      div.querySelector('.lbl-text').addEventListener('click', startEdit);
+
+      const upBtn = div.querySelector('.btn-move-up');
+      const downBtn = div.querySelector('.btn-move-down');
+      if (upBtn && !upBtn.disabled) upBtn.addEventListener('click', () => reorderImage(cat, i, i-1));
+      if (downBtn && !downBtn.disabled) downBtn.addEventListener('click', () => reorderImage(cat, i, i+1));
     }
-    async function saveLabel(idx, newLabel){
-      const r = await api('PATCH', '/api/admin/gallery-label', { category: cat, index: idx, label: newLabel });
-      if (r.ok){ galleryData[cat] = r.category; toast('Label updated'); renderChapter(cat); }
-      else toast(r.error || 'Update failed', true);
-    }
-    div.querySelector('.btn-edit-label').addEventListener('click', startEdit);
-    div.querySelector('.lbl-text').addEventListener('click', startEdit);
-
-    // Reorder
-    const upBtn = div.querySelector('.btn-move-up');
-    const downBtn = div.querySelector('.btn-move-down');
-    if (upBtn && !upBtn.disabled) upBtn.addEventListener('click', () => reorderImage(cat, i, i-1));
-    if (downBtn && !downBtn.disabled) downBtn.addEventListener('click', () => reorderImage(cat, i, i+1));
 
     container.appendChild(div);
   });
+}
+
+// ─── Bulk delete ──────────────────────────────────────────────────────────────
+async function bulkDeleteGallery(cat){
+  const indices = [..._galSelected].sort((a,b) => b - a); // highest first
+  if (!indices.length) return;
+  if (!confirm(`Delete ${indices.length} image${indices.length===1?'':'s'}? This cannot be undone.`)) return;
+  showProgress();
+  try {
+    for (const idx of indices){
+      const r = await api('DELETE', '/api/admin/image', { category: cat, slot: 'gallery', index: idx });
+      if (r.ok) galleryData[cat] = r.category;
+      else { toast(r.error || 'Delete failed', true); break; }
+    }
+    toast(`Deleted ${indices.length} image${indices.length===1?'':'s'}`);
+    _galSelMode = false;
+    _galSelected.clear();
+    const bar = document.getElementById('gal-sel-bar');
+    if (bar) bar.style.display = 'none';
+    renderChapter(cat);
+  } catch(e){ toast('Bulk delete error: '+e.message, true); }
+  endProgress();
 }
 
 async function reorderImage(cat, fromIndex, toIndex){
